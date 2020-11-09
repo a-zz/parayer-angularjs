@@ -1,0 +1,41 @@
+ 
+actArea
+  ^
+  actGrp
+    ^
+    project
+      ^
+      task
+        ^
+        taskChange
+      note
+      attachment
+        ^
+        attachmentRev
+      appointment
+      effortEntry
+      
+-- Later --      
+* Cross references in descr fields
+  !u: usr
+  !t: task
+  !f: attachment (file rev. as per tag date; file history relevant)
+  !l: attachemnt (latest rev.; current status relevant)
+  !a: appointment
+  
+* Calendar: day time table (per user), holidays (global + per user)
+   
+* Attendance: start & end, day balance (matched w/ effort entries), leaves (matched w/ capped project)
+   
+-- Work plan --
+1. actArea < actGrp < project tree view
+2. project view [General+History Tasks Notes Appointments Attachments]
+3. project < note tab
+4. project < task tab
+5. project < history 
+6. project < attachemnt
+7. project < appointments
+8. calendar view 
+9. effort view + helpers (project, note, task, attachment, appointment)
+10. attendance (within calendar view)
+11. Cross references
