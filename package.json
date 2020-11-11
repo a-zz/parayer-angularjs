@@ -1,9 +1,9 @@
 {
-  "name": "angular-seed",
+  "name": "parayer",
   "private": true,
   "version": "0.0.0",
-  "description": "A starter project for AngularJS",
-  "repository": "https://github.com/angular/angular-seed",
+  "description": "A very humble project manager and time tracker",
+  "repository": "https://github.com/a-zz/parayer",
   "license": "MIT",
   "dependencies": {
     "angular": "^1.7.5",
