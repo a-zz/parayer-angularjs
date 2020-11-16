@@ -7,6 +7,7 @@ const appVersion = require('./package.json').version;
 const express = require('express');
 const server = express();
 const http = require('http');
+const retus = require("retus");
 const config = require('./server-config.json');
 const log = require('simple-node-logger').createSimpleLogger(config.loggerOpts);
 log.info(welcomeMsg());
@@ -77,13 +78,61 @@ function welcomeMsg() {
 }
 
 function checkDb() {
+
+	let readyToGo = true;
 	
-	// TODO Check for: CouchDb server running
-	// TODO Check for: CouchDb server version
-	// TODO Check for: parayer db available
-	// TODO Check for: parayer db matching app version
-	log.fatal('CouchDb server not tested yet, bailing out');
-	setTimeout(() => process.exit(1), 1); // TODO Exit error codes to be defined
-	return false;
+	// Check for: CouchDB server running, and its version
+	let couchDbServerUrl = `http://${config.couchDbHost}:${config.couchDbPort}/`;
+	try {
+		let { body } = retus(couchDbServerUrl, {'method': 'get', 'responseType': 'json'});
+		if(body.couchdb==null) {
+			log.fatal(`Got a valid response from ${couchDbServerUrl}, but doesn't look like CouchDb's'...`)
+			readyToGo = false;
+		}
+		else if(!body.version.startsWith('3')) {
+			log.fatal(`CouchDb version at ${couchDbServerUrl} is ${body.version}; supported version is 3.x.x`);
+			readyToGo = false;
+		}
+	}
+	catch(err) {
+		log.fatal(`Couldn't connect to CouchDb server at ${couchDbServerUrl}: ${err}`);
+		readyToGo = false;
+	}
+	
+	if(readyToGo) {
+		// Check for: parayer db available, and its version
+		// TODO Improve this: auth data within the URL looks pretty ugly (sp. under plain HTTP)
+		let parayerDbUrl = `http://${config.couchDbUser}:${config.couchDbPwd}@${config.couchDbHost}:${config.couchDbPort}/${config.couchDbDb}/`;
+		let parayerDBVersionUrl = parayerDbUrl + '_design/core/_view/appVersion';  
+		try { 
+			retus(parayerDbUrl, {'method':'get', 'responseType': 'json'});
+			let { body } = retus(parayerDBVersionUrl, {'method':'get', 'responseType': 'json'});
+			if(body.rows[0]==null) {
+				log.fatal(`parayer database at ${parayerDbUrl} is unversioned, refusing to accept it`);
+				readyToGo = false;
+			}
+			else if(body.rows[0].value!=appVersion) {
+				log.fatal(`parayer database at ${parayerDbUrl} doesn't match app version ${appVersion} (got ${body.rows[0].value})`);
+				readyToGo = false;
+			}
+		}
+		catch(err) {
+			if(err.statusCode==401)
+				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likey because of bad auth: ${err}`);
+			else if(err.statusCode==404)
+				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likely because of wrong db name: ${err}`);
+			else
+				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: ${err}`);
+			readyToGo = false;			
+		}
+	}
+	
+	// All done
+	if(!readyToGo) {
+		setTimeout(() => process.exit(1), 1); // TODO Exit error codes to be defined
+		return false;
+	}
+	else
+		return true;
 }
 /* ********************************************************************************************************************************************************** */

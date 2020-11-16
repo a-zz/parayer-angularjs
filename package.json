@@ -11,6 +11,7 @@
     "angular-route": "^1.7.5",
     "express": "^4.17.1",
     "html5-boilerplate": "0.0.1",
+    "retus": "^1.1.2",
     "simple-node-logger": "^18.12.24"
   },
   "devDependencies": {
