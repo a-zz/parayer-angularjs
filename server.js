@@ -86,16 +86,16 @@ function checkDb() {
 	try {
 		let { body } = retus(couchDbServerUrl, {'method': 'get', 'responseType': 'json'});
 		if(body.couchdb==null) {
-			log.fatal(`Got a valid response from ${couchDbServerUrl}, but doesn't look like CouchDb's'...`)
+			log.fatal(`Got a valid response from ${couchDbServerUrl}, but doesn't look like CouchDB's'...`)
 			readyToGo = false;
 		}
 		else if(!body.version.startsWith('3')) {
-			log.fatal(`CouchDb version at ${couchDbServerUrl} is ${body.version}; supported version is 3.x.x`);
+			log.fatal(`CouchDB version at ${couchDbServerUrl} is ${body.version}; supported version is 3.x.x`);
 			readyToGo = false;
 		}
 	}
 	catch(err) {
-		log.fatal(`Couldn't connect to CouchDb server at ${couchDbServerUrl}: ${err}`);
+		log.fatal(`Couldn't connect to CouchDB server at ${couchDbServerUrl}: ${err}`);
 		readyToGo = false;
 	}
 	
