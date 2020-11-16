@@ -6,11 +6,12 @@
   "repository": "https://github.com/a-zz/parayer",
   "license": "MIT",
   "dependencies": {
-    "angular": "^1.7.5",
+    "angular": "^1.8.2",
     "angular-loader": "^1.7.5",
     "angular-route": "^1.7.5",
     "express": "^4.17.1",
-    "html5-boilerplate": "0.0.1"
+    "html5-boilerplate": "0.0.1",
+    "simple-node-logger": "^18.12.24"
   },
   "devDependencies": {
     "angular-mocks": "^1.7.5",
