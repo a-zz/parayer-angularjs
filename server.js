@@ -103,6 +103,18 @@ function checkDb() {
 		// Check for: parayer db available, and its version
 		// TODO Improve this: auth data within the URL looks pretty ugly (sp. under plain HTTP)
 		let parayerDbUrl = `http://${config.couchDbUser}:${config.couchDbPwd}@${config.couchDbHost}:${config.couchDbPort}/${config.couchDbDb}/`;
+ 		try { 
+			retus(parayerDbUrl, {'method':'get', 'responseType': 'json'});
+		}
+		catch(err) {
+			if(err.statusCode==401)
+				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likey because of bad auth: ${err}`);
+			else if(err.statusCode==404)
+				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likely because of wrong db name: ${err}`);
+			else
+				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: ${err}`);
+			readyToGo = false;			
+		}
 		let parayerDBVersionUrl = parayerDbUrl + '_design/core/_view/appVersion';  
 		try { 
 			retus(parayerDbUrl, {'method':'get', 'responseType': 'json'});
@@ -117,14 +129,12 @@ function checkDb() {
 			}
 		}
 		catch(err) {
-			if(err.statusCode==401)
-				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likey because of bad auth: ${err}`);
-			else if(err.statusCode==404)
-				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likely because of wrong db name: ${err}`);
+			if(err.statusCode==404)
+				log.fatal(`parayer database at ${parayerDbUrl} is unversioned, refusing to accept it`);
 			else
 				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: ${err}`);
 			readyToGo = false;			
-		}
+		}		
 	}
 	
 	// All done
