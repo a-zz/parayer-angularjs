@@ -11,5 +11,5 @@ angular.module('parayer', [
 config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
 	$locationProvider.hashPrefix('!');
 
-	$routeProvider.otherwise({redirectTo: '/actGridView'});
+	$routeProvider.otherwise({redirectTo: '/act-grid-view'});
 }]);
