@@ -30,13 +30,15 @@ _server_.get('/_usrauth', function(req, res) {
 const backendRequestPrefix = '/_data';
 _server_.get(backendRequestPrefix + '/*', function(req, res) {
 	
-	// TODO User auth missing
 	let couchdbQueryString = req.url.substring(backendRequestPrefix.length); 
 	let httpOptions = {
     	host: _config_.couchDbHost,
     	port: _config_.couchDbPort,
-    	path: _config_.couchDbDb + couchdbQueryString,
-    	method: 'GET'
+    	path: '/' + _config_.couchDbDb + couchdbQueryString,
+    	method: 'GET',
+		headers: {
+			'authorization': _config_.couchDbAuthHeader
+		}
   	};
 	let httpReq = __http__.request(httpOptions, function(httpResp) {
 		
@@ -47,11 +49,12 @@ _server_.get(backendRequestPrefix + '/*', function(req, res) {
 		});
 	    httpResp.on('end', function() {
 			// TODO Parse httpRespData for error messages, log accordingly
-      		_log_.info('CouchDB GET request ' + couchdbQueryString + ': ' + httpRespData);
+      		_log_.info('db GET request ' + couchdbQueryString);
+			_log_.trace('db returned '+ httpRespData);
     		res.send(httpRespData);
     	})
   	}).on("error", function(err) {
-  		_log_.error('CouchDB GET request ' + couchdbQueryString + ': ' + err.message);
+  		_log_.error('db GET request ' + couchdbQueryString + ': ' + err.message);
 	});
     httpReq.end();
 });
@@ -136,15 +139,15 @@ function initDbConnection() {
 		catch(err) {
 			switch(err.statusCode) {
 			case 401:
-				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ` +
+				_log_.fatal(`Couldn't connect to parayer db at ${_config_.parayerDbUrl}: ` +
 						`most likey because of bad auth (${_config_.couchDbAuthHeader}): ${err}`);
 				break;
 			case 404:
-				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ` +
+				_log_.fatal(`Couldn't connect to parayer db at ${_config_.parayerDbUrl}: ` +
 						`most likely because of wrong db name: ${err}`);
 				break;
 			default:
-				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ${err}`);
+				_log_.fatal(`Couldn't connect to parayer db at ${_config_.parayerDbUrl}: ${err}`);
 			}
 			readyToGo = false;			
 		}		
@@ -162,23 +165,23 @@ function initDbConnection() {
 			});
 			_log_.trace(`CouchDB query ${parayerDBVersionUrl} returned: ` + JSON.stringify(body));
 			if(body.rows[0]==null) {
-				_log_.fatal(`parayer database at ${_config_.parayerDbUrl} is unversioned, refusing to accept it`);
+				_log_.fatal(`parayer db at ${_config_.parayerDbUrl} is unversioned, refusing to accept it`);
 				readyToGo = false;
 			}
 			else if(body.rows[0].value!=_appVer_) {
-				_log_.fatal(`parayer database at ${_config_.parayerDbUrl} doesn't match app version ${_appVer_} (got ${body.rows[0].value})`);
+				_log_.fatal(`parayer db at ${_config_.parayerDbUrl} doesn't match app version ${_appVer_} (got ${body.rows[0].value})`);
 				readyToGo = false;
 			}
 			else
-				_log_.debug(`Checked for matching parayer db version: OK`);
+				_log_.debug(`Checked for matching parayer db version: OK (${_config_.parayerDbUrl}, authorization header: ${_config_.couchDbAuthHeader})`);
 		}
 		catch(err) {
 			switch(err.statusCode) {
 			case 404:
-				_log_.fatal(`parayer database at ${_config_.parayerDbUrl} is unversioned, refusing to accept it`);
+				_log_.fatal(`parayer db at ${_config_.parayerDbUrl} is unversioned, refusing to accept it`);
 				break;
 			default:
-				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ${err}`);
+				_log_.fatal(`Couldn't connect to parayer db at ${_config_.parayerDbUrl}: ${err}`);
 			}
 			readyToGo = false;			
 		}				
