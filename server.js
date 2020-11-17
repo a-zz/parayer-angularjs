@@ -3,47 +3,42 @@
  * App server-side engine                                                                                                                                     *
  * ********************************************************************************************************************************************************** */
 
-const appVersion = require('./package.json').version;
-const express = require('express');
-const server = express();
-const http = require('http');
-const retus = require("retus");
-const config = require('./server-config.json');
-const log = require('simple-node-logger').createSimpleLogger(config.loggerOpts);
-log.info(welcomeMsg());
-var readyToGo = true;
-readyToGo = readyToGo && checkDb();
-if(readyToGo) {
-	server.listen(config.httpPort, function() {
+/* *** Server dependencies and configuration *** ************************************************************************************************************ */
+const 	__express__	= require('express');	// HTTP server
+const 	__http__ 	= require('http');		// HTTP client, asynchronous
+const 	__retus__ 	= require("retus");		// HTTP client, synchronous
 
-		log.info(`Server up & runnig, listening on port: ${config.httpPort}`);
-	});
-}
+const 	_appVer_ 	= require('./package.json').version;
+var 	_config_ 	= require('./server-config.json');
+const 	_log_ 		= require('simple-node-logger').createSimpleLogger(_config_.loggerOpts);
+
+const 	_server_ 	= initServer();
 
 /* *** Service definitions *** ****************************************************************************************************************************** */
 /* Static contents (i.e. angular-js frontend files) served from app/ subdir */
-server.use(express.static('app'));
+_server_.use(__express__.static('app'));
 
 /* User authentication service */
 // TODO User auth to be implemented
-server.get('/_usrauth', function(req, res) {
+_server_.get('/_usrauth', function(req, res) {
 	
-	log.info('User authentication request ' + req.url + ': to be implemented!');
+	_log_.info('User authentication request ' + req.url + ': to be implemented!');
     res.send('User authentication request ' + req.url + ': to be implemented!');
 });
 
 /* Data requests (to be redirected to CouchDB server) */
 const backendRequestPrefix = '/_data';
-server.get(backendRequestPrefix + '/*', function(req, res) {
+_server_.get(backendRequestPrefix + '/*', function(req, res) {
 	
+	// TODO User auth missing
 	let couchdbQueryString = req.url.substring(backendRequestPrefix.length); 
 	let httpOptions = {
-    	host: config.couchDbHost,
-    	port: config.couchDbPort,
-    	path: config.couchDbDb + couchdbQueryString,
+    	host: _config_.couchDbHost,
+    	port: _config_.couchDbPort,
+    	path: _config_.couchDbDb + couchdbQueryString,
     	method: 'GET'
   	};
-	let httpReq = http.request(httpOptions, function(httpResp) {
+	let httpReq = __http__.request(httpOptions, function(httpResp) {
 		
 		let httpRespData = '';
     	httpResp.setEncoding('utf8');
@@ -52,21 +47,41 @@ server.get(backendRequestPrefix + '/*', function(req, res) {
 		});
 	    httpResp.on('end', function() {
 			// TODO Parse httpRespData for error messages, log accordingly
-      		log.info('CouchDB GET request ' + couchdbQueryString + ': ' + httpRespData);
+      		_log_.info('CouchDB GET request ' + couchdbQueryString + ': ' + httpRespData);
     		res.send(httpRespData);
     	})
   	}).on("error", function(err) {
-  		log.error('CouchDB GET request ' + couchdbQueryString + ': ' + err.message);
+  		_log_.error('CouchDB GET request ' + couchdbQueryString + ': ' + err.message);
 	});
     httpReq.end();
 });
 
 /* Test service */ 
-server.get('/_test', function(req, res) {
+_server_.get('/_test', function(req, res) {
 	
-    res.send({'message': 'It works! :)', 'version': appVersion });
+    res.send({'message': 'It works! :)', 'version': _appVer_ });
 });
-/* *** Utility functions *** ******************************************************************************************************************************** */
+
+/* *** Initialization procedure *** ************************************************************************************************************************* */
+function initServer() {
+
+	_log_.info(welcomeMsg());
+	_log_.debug('Starting pre-flight check...');
+	
+	var readyToGo = true;
+	readyToGo = readyToGo && initDbConnection();
+		
+	if(readyToGo) {
+		let server = __express__();
+		_log_.debug('Everything seems fine, ready to go!');
+		server.listen(_config_.httpPort, function() {
+	
+			_log_.info(`Server up & runnig, listening on port: ${_config_.httpPort}`);
+		});
+		return server;
+	}		
+}
+
 function welcomeMsg() {
 	
 	return 	'\n ' +
@@ -74,67 +89,99 @@ function welcomeMsg() {
 			'   / __ \\/ __ `/ ___/ __ `/ / / / _ \\/ ___/\n' +
 			'  / /_/ / /_/ / /  / /_/ / /_/ /  __/ /    \n' +
 			' / .___/\\__,_/_/   \\__,_/\\__, /\\___/_/     \n' + 
-			'/_/                     /____/ version ' + appVersion + ' booting up!\n';
+			'/_/                     /____/ version ' + _appVer_ + ' booting...\n';
 }
 
-function checkDb() {
+function initDbConnection() {
 
 	let readyToGo = true;
 	
-	// Check for: CouchDB server running, and its version
-	let couchDbServerUrl = `http://${config.couchDbHost}:${config.couchDbPort}/`;
-	try {
-		let { body } = retus(couchDbServerUrl, {'method': 'get', 'responseType': 'json'});
-		if(body.couchdb==null) {
-			log.fatal(`Got a valid response from ${couchDbServerUrl}, but doesn't look like CouchDB's'...`)
-			readyToGo = false;
+	// TODO Implement cookie (re)authentication for CouchDB 
+	_config_.couchDbServerUrl = `http://${_config_.couchDbHost}:${_config_.couchDbPort}`;
+	_config_.parayerDbUrl = `${_config_.couchDbServerUrl}/${_config_.couchDbDb}`;
+	_config_.couchDbAuthHeader = 'Basic ' + Buffer.from(_config_.couchDbUser + ':' + _config_.couchDbPwd).toString('base64');
+		
+	if(readyToGo) { // Check for: CouchDB server running, and its version		
+		try {
+			let { body } = __retus__(_config_.couchDbServerUrl, {'method': 'get', 'responseType': 'json'});
+			_log_.trace(`CouchDB query ${_config_.couchDbServerUrl} returned: ` + JSON.stringify(body));
+			if(body.couchdb==null) {
+				_log_.fatal(`Got a valid response from ${_config_.couchDbServerUrl}, but doesn't look like CouchDB's'...`)
+				readyToGo = false;
+			}
+			else if(!body.version.startsWith('3')) {
+				_log_.fatal(`CouchDB version at ${_config_.couchDbServerUrl} is ${body.version}; supported version is 3.x.x`);
+				readyToGo = false;
+			}
+			else
+				_log_.debug(`Checked CouchDb server and its version: OK`);
 		}
-		else if(!body.version.startsWith('3')) {
-			log.fatal(`CouchDB version at ${couchDbServerUrl} is ${body.version}; supported version is 3.x.x`);
+		catch(err) {
+			_log_.fatal(`Couldn't connect to CouchDB server at ${_config_.couchDbServerUrl}: ${err}`);
 			readyToGo = false;
-		}
-	}
-	catch(err) {
-		log.fatal(`Couldn't connect to CouchDB server at ${couchDbServerUrl}: ${err}`);
-		readyToGo = false;
+		}		
 	}
 	
-	if(readyToGo) {
-		// Check for: parayer db available, and its version
-		// TODO Improve this: auth data within the URL looks pretty ugly (sp. under plain HTTP)
-		let parayerDbUrl = `http://${config.couchDbUser}:${config.couchDbPwd}@${config.couchDbHost}:${config.couchDbPort}/${config.couchDbDb}/`;
+	if(readyToGo) { // Check for: parayer db available		
  		try { 
-			retus(parayerDbUrl, {'method':'get', 'responseType': 'json'});
+			__retus__(_config_.parayerDbUrl, {
+				'method':'get', 
+				'responseType': 'json', 
+				headers: {
+					'authorization': _config_.couchDbAuthHeader
+				}
+			});
+			_log_.debug(`Checked whether parayer db is available: OK`);
 		}
 		catch(err) {
-			if(err.statusCode==401)
-				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likey because of bad auth: ${err}`);
-			else if(err.statusCode==404)
-				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: most likely because of wrong db name: ${err}`);
-			else
-				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: ${err}`);
-			readyToGo = false;			
-		}
-		let parayerDBVersionUrl = parayerDbUrl + '_design/core/_view/appVersion';  
-		try { 
-			retus(parayerDbUrl, {'method':'get', 'responseType': 'json'});
-			let { body } = retus(parayerDBVersionUrl, {'method':'get', 'responseType': 'json'});
-			if(body.rows[0]==null) {
-				log.fatal(`parayer database at ${parayerDbUrl} is unversioned, refusing to accept it`);
-				readyToGo = false;
+			switch(err.statusCode) {
+			case 401:
+				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ` +
+						`most likey because of bad auth (${_config_.couchDbAuthHeader}): ${err}`);
+				break;
+			case 404:
+				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ` +
+						`most likely because of wrong db name: ${err}`);
+				break;
+			default:
+				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ${err}`);
 			}
-			else if(body.rows[0].value!=appVersion) {
-				log.fatal(`parayer database at ${parayerDbUrl} doesn't match app version ${appVersion} (got ${body.rows[0].value})`);
-				readyToGo = false;
-			}
-		}
-		catch(err) {
-			if(err.statusCode==404)
-				log.fatal(`parayer database at ${parayerDbUrl} is unversioned, refusing to accept it`);
-			else
-				log.fatal(`Couldn't connect to parayer database at ${parayerDbUrl}: ${err}`);
 			readyToGo = false;			
 		}		
+	}
+	
+	if(readyToGo) { // Check for: parayer db version		
+		var parayerDBVersionUrl = _config_.parayerDbUrl + '/_design/core/_view/appVersion';  
+		try { 
+			let { body } = __retus__(parayerDBVersionUrl, {
+				'method':'get', 
+				'responseType': 'json',
+				headers: {
+					'authorization': _config_.couchDbAuthHeader
+				}
+			});
+			_log_.trace(`CouchDB query ${parayerDBVersionUrl} returned: ` + JSON.stringify(body));
+			if(body.rows[0]==null) {
+				_log_.fatal(`parayer database at ${_config_.parayerDbUrl} is unversioned, refusing to accept it`);
+				readyToGo = false;
+			}
+			else if(body.rows[0].value!=_appVer_) {
+				_log_.fatal(`parayer database at ${_config_.parayerDbUrl} doesn't match app version ${_appVer_} (got ${body.rows[0].value})`);
+				readyToGo = false;
+			}
+			else
+				_log_.debug(`Checked for matching parayer db version: OK`);
+		}
+		catch(err) {
+			switch(err.statusCode) {
+			case 404:
+				_log_.fatal(`parayer database at ${_config_.parayerDbUrl} is unversioned, refusing to accept it`);
+				break;
+			default:
+				_log_.fatal(`Couldn't connect to parayer database at ${_config_.parayerDbUrl}: ${err}`);
+			}
+			readyToGo = false;			
+		}				
 	}
 	
 	// All done
