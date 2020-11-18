@@ -12,6 +12,8 @@ const 	_appVer_ 	= require('./package.json').version;
 var 	_config_ 	= require('./server-config.json');
 const 	_log_ 		= require('simple-node-logger').createSimpleLogger(_config_.loggerOpts);
 
+/* *** Start-up procedure *** ******************************************************************************************************************************* */
+parseCmdLineArgs();
 const 	_server_ 	= initServer();
 
 /* *** Service definitions *** ****************************************************************************************************************************** */
@@ -79,7 +81,7 @@ function initServer() {
 		_log_.debug('Everything seems fine, ready to go!');
 		server.listen(_config_.httpPort, function() {
 	
-			_log_.info(`Server up & runnig, listening on port: ${_config_.httpPort}`);
+			_log_.info(`Server up & runnig, listening on port: ${_config_.httpPort} \\o/`);
 		});
 		return server;
 	}		
@@ -103,6 +105,11 @@ function initDbConnection() {
 	_config_.couchDbServerUrl = `http://${_config_.couchDbHost}:${_config_.couchDbPort}`;
 	_config_.parayerDbUrl = `${_config_.couchDbServerUrl}/${_config_.couchDbDb}`;
 	_config_.couchDbAuthHeader = 'Basic ' + Buffer.from(_config_.couchDbUser + ':' + _config_.couchDbPwd).toString('base64');
+		
+	if(_config_.couchDbByPassInitCheck) {
+		_log_.debug('Bypassing init db check as ordered (--bypass-init-db-check)');
+		return true;
+	}
 		
 	if(readyToGo) { // Check for: CouchDB server running, and its version		
 		try {
@@ -189,10 +196,29 @@ function initDbConnection() {
 	
 	// All done
 	if(!readyToGo) {
-		setTimeout(() => process.exit(1), 1); // TODO Exit error codes to be defined
+		setTimeout(() => process.exit(11), 1); // TODO Exit error codes to be defined
 		return false;
 	}
 	else
 		return true;
+}
+/* *** Utilities *** **************************************************************************************************************************************** */
+function parseCmdLineArgs() {
+	
+	var inTrouble = false;
+	for(let i = 2; i<process.argv.length; i++) {
+		if(process.argv[i]=='--bypass-init-db-check')
+			_config_.couchDbByPassInitCheck = true;
+		else
+			inTrouble = true;
+	}
+	if(inTrouble) {
+		console.log(`parayer server-side engine, version ${_appVer_}`);
+		console.log(`Bailing out because of wrong startup parameters.\n`);
+		console.log(`Valid arguments are:`);
+		console.log(`  --bypass-init-db-check	For faster boots, e.g. in development enviroments`);
+		console.log(`\n`);
+		process.exit(1); // TODO Exit error codes to be defined
+	}
 }
 /* ********************************************************************************************************************************************************** */
