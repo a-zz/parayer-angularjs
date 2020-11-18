@@ -1,4 +1,13 @@
-<p>Activity grid goes here!</p>
-<ul class="act-tree">
+<style>
+	/* TODO Temporary style block; to be moved to app.css file */
 
-</ul>
+</style>
+<table class="act-grid">
+	<tr>
+		<th class="act-grid-header" title="User activities (areas / groups / projects): {{nAreas}} / {{nGroups}} / {{nProjects}}">Activity</th>
+	</tr>
+	<tr ng-repeat="activity in myActList" class="act-grid-row" title="{{activity[1].value.descr}}" id="{{activity[1].id}}">
+		<td class="act-grid-name-{{activity[0]}}-cell">{{activity[1].value.name}}</td>
+	</tr>
+</table>
+

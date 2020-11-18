@@ -1,5 +1,6 @@
-/* app css stylesheet */
+/* parayer css stylesheet */
 
+/* Menu: inherited from angular-seed project */
 .menu {
   list-style: none;
   border-bottom: 0.1em solid black;
@@ -22,4 +23,26 @@
 .menu > li + li:before {
   content: "|";
   padding-right: 0.3em;
+}
+
+/* Activity grid */
+tr.act-grid-row:hover {
+	background-color: lightyellow;
+}
+
+td.act-grid-name-area-cell { 
+	padding-left: 0pt; 
+	font-weight: bold; 
+	border: black 1px solid;
+}
+
+td.act-grid-name-group-cell { 
+	padding-left: 10pt;
+	border: black 1px solid;
+}
+
+td.act-grid-name-project-cell { 
+	padding-left: 20pt; 
+	font-style: italic; 
+	border: black 1px solid;
 }
