@@ -13,7 +13,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 
 	// TODO This should be global (or cookie-set?)
 	var _usrId_ = 'usr~3602049025343d92386f90135b000f1e'; 
-
+	
 	$scope.myActList = [];	
 
 	$scope.nAreas = 0;
@@ -54,6 +54,32 @@ angular.module('parayer.actGridView', ['ngRoute'])
 			});		
 		});
 	});
+	
+	$scope.activityChanges = [];
+	$scope.trackActivityChange = function(src) {
+		
+		$scope.activityChanges.push(src.activity[1].id);
+	}	
+	
+	$scope.updateActivity = function(src) {
+				
+		for(let i = 0; i<$scope.activityChanges.length; i++) {
+			if($scope.activityChanges[i]==src.activity[1].id) {
+				let dbObjUrl = `/_data/${src.activity[1].id}`; 
+				$http.get(dbObjUrl).then(function(qryResp) {					
+					var activity = qryResp.data;
+					activity.name = src.activity[1].value.name;
+					// TODO Other fields...
+					$http.put(dbObjUrl, JSON.stringify(activity)).then(function(updResp) {
+						// TODO Check resp, warn of failures
+						console.log(updResp)
+						$scope.activityChanges.splice(i, 1);	
+					});					
+				});				
+				break;
+			}
+		}
+	}
 }]);
 
 // TODO This should be global

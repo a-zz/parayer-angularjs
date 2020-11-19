@@ -26,23 +26,53 @@
 }
 
 /* Activity grid */
-tr.act-grid-row:hover {
+.act-grid { 
+	margin: 0pt; 
+	border-collapse: collapse;
+    border-spacing: 0;
+}
+
+table.act-grid {
+	margin: 5pt;
+}
+
+thead.act-grid, tbody.act-grid { 
+	display: block; 
+}
+
+tbody.act-grid {
+	/*height: 500px;*/
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+tr.act-grid:hover {
 	background-color: lightyellow;
 }
 
-td.act-grid-name-area-cell { 
-	padding-left: 0pt; 
+td.act-grid-label-area { 
+	padding-left: 5pt; 
 	font-weight: bold; 
-	border: black 1px solid;
+	border: grey 1px solid;
 }
 
-td.act-grid-name-group-cell { 
-	padding-left: 10pt;
-	border: black 1px solid;
+td.act-grid-label-group { 
+	padding-left: 15pt;
+	border: grey 1px solid;
 }
 
-td.act-grid-name-project-cell { 
-	padding-left: 20pt; 
+td.act-grid-label-project { 
+	padding-left: 25pt; 
 	font-style: italic; 
-	border: black 1px solid;
+	border: grey 1px solid;
+}
+
+input.act-grid-label {
+	border: none;
+	/*width: 80%;*/
+	margin-right: auto;
+}
+
+input.act-grid-label:hover {
+	background-color: lightyellow;
 }

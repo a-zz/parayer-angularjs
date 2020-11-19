@@ -3,11 +3,18 @@
 
 </style>
 <table class="act-grid">
-	<tr>
-		<th class="act-grid-header" title="User activities (areas / groups / projects): {{nAreas}} / {{nGroups}} / {{nProjects}}">Activity</th>
-	</tr>
-	<tr ng-repeat="activity in myActList" class="act-grid-row" title="{{activity[1].value.descr}}" id="{{activity[1].id}}">
-		<td class="act-grid-name-{{activity[0]}}-cell">{{activity[1].value.name}}</td>
-	</tr>
+	<thead class="act-grid">
+		<th class="act-grid" title="User activities (areas / groups / projects): {{nAreas}} / {{nGroups}} / {{nProjects}}">Activity</th>
+	</thead>
+	<tbody class="act-grid">
+		<tr ng-repeat="activity in myActList" class="act-grid" title="{{activity[1].value.descr}}" id="{{activity[1].id}}">
+			<td class="act-grid-label-{{activity[0]}}">
+				<input class="act-grid-label-{{activity[0]}} act-grid-label" tabindex="-1"
+					ng-model="activity[1].value.name" 
+					ng-change="trackActivityChange(this);"
+					ng-blur="updateActivity(this);"/>
+			</td>
+		</tr>
+	</tbody>
 </table>
 
