@@ -29,10 +29,10 @@ _server_.get('/_usrauth', function(req, res) {
 });
 
 /* Data requests (to be redirected to CouchDB server) */
-const backendRequestPrefix = '/_data';
-_server_.get(backendRequestPrefix + '/*', function(req, res) {
+const dbRequestPrefix = '/_data';
+_server_.get(dbRequestPrefix + '/*', function(req, res) {
 	
-	let couchdbQueryString = req.url.substring(backendRequestPrefix.length); 
+	let couchdbQueryString = req.url.substring(dbRequestPrefix.length); 
 	let httpOptions = {
     	host: _config_.couchDbHost,
     	port: _config_.couchDbPort,
@@ -51,13 +51,51 @@ _server_.get(backendRequestPrefix + '/*', function(req, res) {
 		});
 	    httpResp.on('end', function() {
 			// TODO Parse httpRespData for error messages, log accordingly
-      		_log_.info('db GET request ' + couchdbQueryString);
+      		_log_.debug(_log_.info(`db GET request to ${couchdbQueryString}`));
 			_log_.trace('db returned '+ httpRespData);
     		res.send(httpRespData);
     	})
   	}).on("error", function(err) {
-  		_log_.error('db GET request ' + couchdbQueryString + ': ' + err.message);
+  		_log_.error(`db GET request ${couchdbQueryString}: ${err.message}`);
 	});
+    httpReq.end();
+});
+
+_server_.put(dbRequestPrefix + '/*', function(req, res) {
+	
+	let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
+        return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
+    });
+	
+	let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
+	let httpOptions = {
+    	host: _config_.couchDbHost,
+    	port: _config_.couchDbPort,
+    	path: '/' + _config_.couchDbDb + couchdbQueryString,
+    	method: 'PUT',
+		headers: {
+			'authorization': _config_.couchDbAuthHeader,
+			'Content-Type': 'application/json; charset=utf-8',
+    		'Content-Length': putData.length
+		}
+  	};
+	let httpReq = __http__.request(httpOptions, function(httpResp) {
+		
+		let httpRespData = '';
+    	httpResp.setEncoding('utf8');
+		httpResp.on('data', function(chunk) {
+			httpRespData += chunk;
+		});
+	    httpResp.on('end', function() {
+			// TODO Parse httpRespData for error messages, log accordingly
+      		_log_.debug(`db PUT request to ${couchdbQueryString} : (data: ${putData})`);
+			_log_.trace('db returned '+ httpRespData);
+    		res.send(httpRespData);
+    	})
+  	}).on("error", function(err) {
+  		_log_.error('db PUT request ' + couchdbQueryString + ': ' + err.message);
+	});
+	httpReq.write(putData);
     httpReq.end();
 });
 
@@ -83,6 +121,7 @@ function initServer() {
 	
 			_log_.info(`Server up & runnig, listening on port: ${_config_.httpPort} \\o/`);
 		});
+		server.use(__express__.json());
 		return server;
 	}		
 }
