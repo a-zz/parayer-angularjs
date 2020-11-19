@@ -3,6 +3,12 @@
  * App server-side engine                                                                                                                                     *
  * ********************************************************************************************************************************************************** */
 
+// TODO Auth required for frontend access
+// TODO User auth service required
+// TODO HTTPS support required for frontend <-> express <-> couchdb connections
+// TODO Exit error codes to be defined
+// TODO Cookie authentication (and re-) for CouchDB
+
 /* *** Server dependencies and configuration *** ************************************************************************************************************ */
 const 	__express__	= require('express');	// HTTP server
 const 	__http__ 	= require('http');		// HTTP client, asynchronous
@@ -139,8 +145,7 @@ function welcomeMsg() {
 function initDbConnection() {
 
 	let readyToGo = true;
-	
-	// TODO Implement cookie (re)authentication for CouchDB 
+		
 	_config_.couchDbServerUrl = `http://${_config_.couchDbHost}:${_config_.couchDbPort}`;
 	_config_.parayerDbUrl = `${_config_.couchDbServerUrl}/${_config_.couchDbDb}`;
 	_config_.couchDbAuthHeader = 'Basic ' + Buffer.from(_config_.couchDbUser + ':' + _config_.couchDbPwd).toString('base64');
