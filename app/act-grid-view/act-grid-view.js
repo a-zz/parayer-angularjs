@@ -11,11 +11,12 @@ angular.module('parayer.actGridView', ['ngRoute'])
 }])
 .controller('actGridViewCtrl', ['$scope', '$http', function($scope, $http) {
 
+	// TODO Add comments
+	
 	// TODO This should be global (or cookie-set?)
 	var _usrId_ = 'usr~3602049025343d92386f90135b000f1e'; 
 	
 	$scope.myActList = [];	
-
 	$scope.nAreas = 0;
 	$scope.nGroups = 0;
 	$scope.nProjects = 0;
@@ -54,6 +55,9 @@ angular.module('parayer.actGridView', ['ngRoute'])
 			});		
 		});
 	});
+	
+	$scope.selectedDate = new Date();
+	$scope.selectedWeek = computeWeek($scope.selectedDate); 
 	
 	$scope.activityChanges = [];
 	$scope.trackActivityChange = function(src) {
@@ -99,4 +103,19 @@ function sortItemsByField(items, field) {
 			r.push(items[i]);
 	}
 	return r;
+}
+
+function computeWeek(selectedDate) {
+
+	// TODO These should be global
+	let weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+	let months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dec'];
+	
+	let week = [];
+	for(let d = 1 - selectedDate.getDay(); d<=7-selectedDate.getDay(); d++) {
+		let date = new Date(selectedDate);
+		date.setDate(date.getDate() + d);		
+		week.push({'dt': weekDays[date.getDay()], 'dm': date.getDate(), 'mn': date.getMonth()+1, 'mt': months[date.getMonth()+1], 'today': (d==0)});
+	}	
+	return week;
 }

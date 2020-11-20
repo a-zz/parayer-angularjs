@@ -15,7 +15,7 @@
 	<script src="lib/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
 </head>
 <body>
-	 <ul class="menu">
+	 <ul class="layout" id="menu">
 	<li><a href="#!/actGridView">activity</a></li>
 	 	<li><a href="#!/view1">view1</a></li>
 	 	<li><a href="#!/view2">view2</a></li>
@@ -25,9 +25,9 @@
 	    <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
 	
-	<div ng-view></div>
+	<div class="layout" "id="cntnr-main" ng-view></div>
 	
-	<div>
+	<div class="layout" id="cntnr-footer">
 		<hr>
 		parayer v<span app-version></span>
 	</div>
