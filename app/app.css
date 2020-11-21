@@ -1,30 +1,5 @@
 /* parayer css stylesheet */
 
-/* Menu: inherited from angular-seed project */
-.layout#menu {
-  list-style: none;
-  border-bottom: 0.1em solid black;
-  margin-bottom: 2em;
-  padding: 0 0 0.5em;
-}
-
-.layout#menu:before {
-  content: "[";
-}
-
-.layout#menu:after {
-  content: "]";
-}
-
-.layout#menu > li {
-  display: inline;
-}
-
-.layout#menu > li + li:before {
-  content: "|";
-  padding-right: 0.3em;
-}
-
 /* Main layout */
 html, body {
 	margin: 0em;

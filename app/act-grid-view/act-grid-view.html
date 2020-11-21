@@ -21,16 +21,16 @@
 					ng-blur="updateActivity(this);"/>
 			</td>
 			<td class="act-grid act-grid-cntnr-control">
-				<a href="#!/act-{{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}/{{activity.id}}"
+				<a href=""
 				 	class="act-grid-control" title="Add new {{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}" 
 				 	ng-if="activity.value.type!='Project'">
 					&#10133;
 				</a>
-				<a href="#!/act-{{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}/{{activity.id}}" 
+				<a href="#!/{{activity.value.type=='ActArea'?'act-area':activity.value.type=='ActGrp'?'act-group':'project'}}/{{activity.id}}" 
 					class="act-grid-control" title="Properties">
 					&#128295;
 				</a>				
-				<a href="#!/act-{{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}/{{activity.id}}" 
+				<a href="" 
 					class="act-grid-control" 
 					title="Delete this {{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}">
 					&#128465;

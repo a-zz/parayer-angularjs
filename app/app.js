@@ -5,6 +5,8 @@ angular.module('parayer', [
 	'ngRoute',
 	'parayer.actGridView',
 	'parayer.actAreaView',
+	'parayer.actGroupView',
+	'parayer.projectView',
 	'parayer.view2',
 	'parayer.version'
 ]).
