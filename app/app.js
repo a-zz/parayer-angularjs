@@ -4,12 +4,12 @@
 angular.module('parayer', [
 	'ngRoute',
 	'parayer.actGridView',
-	'parayer.view1',
+	'parayer.actAreaView',
 	'parayer.view2',
 	'parayer.version'
 ]).
 config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
 	$locationProvider.hashPrefix('!');
 
-	$routeProvider.otherwise({redirectTo: '/act-grid-view'});
+	$routeProvider.otherwise({redirectTo: '/act-grid'});
 }]);

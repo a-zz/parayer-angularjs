@@ -23,9 +23,10 @@
 				<span class="act-grid-control" title="Add new {{activity[0]=='area'?'activity group':'project'}}" ng-if="activity[0]!='project'">
 					&#10133;
 				</span>
-				<span class="act-grid-control" title="Properties">
+				<a href="#!/act-{{activity[0]=='area'?'area':activity[0]=='group'?'group':'project'}}/{{activity[1].id}}" 
+					class="act-grid-control" title="Properties">
 					&#128295;
-				</span>				
+				</a>				
 				<span class="act-grid-control" title="Delete this {{activity[0]=='area'?'activity area':activity[0]=='group'?'activity group':'project'}}">
 					&#128465;
 				</span>

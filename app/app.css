@@ -126,6 +126,7 @@ td.act-grid-cntnr-control {
 }
 
 .act-grid-control {
+	text-decoration: none;
 	margin: none;
 	padding: 0.1em;
 	border: 1px solid transparent;
@@ -133,6 +134,7 @@ td.act-grid-cntnr-control {
 }
 
 .act-grid-control:hover {
+	text-decoration: none;
 	border: 1px solid lightgrey;
 	cursor: pointer;
 }

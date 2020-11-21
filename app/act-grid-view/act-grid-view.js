@@ -4,14 +4,14 @@ angular.module('parayer.actGridView', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
 	
-	$routeProvider.when('/act-grid-view', {
+	$routeProvider.when('/act-grid', {
 		templateUrl: 'act-grid-view/act-grid-view.html',
 		controller: 'actGridViewCtrl'
 	});
 }])
 .controller('actGridViewCtrl', ['$scope', '$http', function($scope, $http) {
 
-	// TODO Add comments
+	// TODO Add method contract comments
 	
 	// TODO This should be global (or cookie-set?)
 	var _usrId_ = 'usr~3602049025343d92386f90135b000f1e'; 
