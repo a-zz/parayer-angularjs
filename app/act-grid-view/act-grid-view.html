@@ -7,33 +7,38 @@
 	</thead>
 	<tbody class="act-grid">
 		<tr>
-			<th class="act-grid" title="User activities (areas / groups / projects): {{nAreas}} / {{nGroups}} / {{nProjects}}">Activity</th>
+			<th class="act-grid" title="User activities (areas / groups / projects): {{areas.length}} / {{groups.length}} / {{projects.length}}">Activity</th>
 			<td class="act-grid act-grid-cntnr-control">(+)</td>
 			<th class="act-grid sum">Week<br>Total</th>
 			<th ng-repeat="dayOfWeek in selectedWeek" class="act-grid {{dayOfWeek.today?'today':''}}">{{dayOfWeek.dt}}<br>{{dayOfWeek.dm}}/{{dayOfWeek.mt}}</th>			
 		</tr>
-		<tr ng-repeat="activity in myActList" class="act-grid" title="{{activity[1].value.descr}}">
+		<tr ng-repeat="activity in myActList" class="act-grid" title="{{activity.value.descr}}">
 			<td class="act-grid act-grid-cntnr-caption">
-				<input class="act-grid-label-{{activity[0]}} act-grid-label" tabindex="-1"
-					ng-model="activity[1].value.name" 
+				<input class="act-grid-label-{{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}} act-grid-label" 
+					tabindex="-1"
+					ng-model="activity.value.name" 
 					ng-change="trackActivityChange(this);"
 					ng-blur="updateActivity(this);"/>
 			</td>
 			<td class="act-grid act-grid-cntnr-control">
-				<span class="act-grid-control" title="Add new {{activity[0]=='area'?'activity group':'project'}}" ng-if="activity[0]!='project'">
+				<a href="#!/act-{{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}/{{activity.id}}"
+				 	class="act-grid-control" title="Add new {{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}" 
+				 	ng-if="activity.value.type!='Project'">
 					&#10133;
-				</span>
-				<a href="#!/act-{{activity[0]=='area'?'area':activity[0]=='group'?'group':'project'}}/{{activity[1].id}}" 
+				</a>
+				<a href="#!/act-{{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}/{{activity.id}}" 
 					class="act-grid-control" title="Properties">
 					&#128295;
 				</a>				
-				<span class="act-grid-control" title="Delete this {{activity[0]=='area'?'activity area':activity[0]=='group'?'activity group':'project'}}">
+				<a href="#!/act-{{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}/{{activity.id}}" 
+					class="act-grid-control" 
+					title="Delete this {{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}">
 					&#128465;
-				</span>
+				</a>
 			</td>
 			<td class="act-grid effort sum"></td>
 			<td ng-repeat="dayOfWeek in selectedWeek" class="act-grid effort">
-				<span ng-if="activity[0]=='project'">
+				<span ng-if="activity.value.type=='Project'">
 					<span class="effort-control" title="+ effort unit">
 						&#10133;
 					</span>

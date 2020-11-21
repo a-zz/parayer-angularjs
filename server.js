@@ -69,6 +69,8 @@ _server_.get(dbRequestPrefix + '/*', function(req, res) {
 
 _server_.put(dbRequestPrefix + '/*', function(req, res) {
 	
+	// TODO Object validation required
+	
 	let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
         return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
     });
