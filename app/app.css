@@ -89,7 +89,7 @@ input.act-grid-label {
 
 input.act-grid-label:focus {
 	border: none;	
-	border-bottom: 1px solid lightblue;
+	border-bottom: 1px dashed orange;
 	background-color: lightyellow;
 }
 
@@ -149,5 +149,6 @@ input.act-grid-effort {
 
 input.act-grid-effort:focus {
 	border: none;	
-	border-bottom: 1px solid lightblue;
+	border-bottom: 1px dashed orange;
+	background-color: lightyellow;
 }

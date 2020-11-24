@@ -1,1 +1,9 @@
-Activty area properties - It works!
+<h1>Activity area</h1>
+<form class="properties" ng-controller="actAreaViewCtrl" ng-submit="save();"">
+	<input class="properties" ng-model="actArea.name" placeholder="Activity area name (required)" tabindex="1"><br>
+	<textarea class="properties" ng-model="actArea.descr" placeholder="Activity area description" tabindex="2"></textarea><br>
+	<span class="properties">{{actArea.usrAdminList}} (TODO)</span><br>
+	<span class="properties">{{actArea.usrAssignList}} (TODO)</span><br>
+	<input class="properties ok" type="submit" value="Save" title="Ok!"  tabindex="11">&nbsp;
+	<input class="properties cancel" type="button" value="Cancel" title="Discard changes and go back" tabindex="12" onclick="window.history.back();">
+</form>

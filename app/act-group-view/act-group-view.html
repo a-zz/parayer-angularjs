@@ -1,1 +1,9 @@
-Activty group properties - It works!
+<h1>Activity group</h1>
+<form class="properties" ng-controller="actGroupViewCtrl" ng-submit="save();"">
+	<input class="properties" ng-model="actGroup.name" placeholder="Activity group name (required)" tabindex="1"><br>
+	<textarea class="properties" ng-model="actGroup.descr" placeholder="Activity group description" tabindex="2"></textarea><br>
+	<span class="properties">{{actGroup.usrAdminList}} (TODO)</span><br>
+	<span class="properties">{{actGroup.usrAssignList}} (TODO)</span><br>
+	<input class="properties ok" type="submit" value="Save" title="Ok!"  tabindex="11">&nbsp;
+	<input class="properties cancel" type="button" value="Cancel" title="Discard changes and go back" tabindex="12" onclick="window.history.back();">
+</form>

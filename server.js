@@ -38,6 +38,8 @@ _server_.get('/_usrauth', function(req, res) {
 const dbRequestPrefix = '/_data';
 _server_.get(dbRequestPrefix + '/*', function(req, res) {
 	
+	// TODO Data access permission check required
+	
 	let couchdbQueryString = req.url.substring(dbRequestPrefix.length); 
 	let httpOptions = {
     	host: _config_.couchDbHost,

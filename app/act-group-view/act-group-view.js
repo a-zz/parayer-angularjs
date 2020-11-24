@@ -9,7 +9,21 @@ angular.module('parayer.actGroupView', ['ngRoute'])
 		controller: 'actGroupViewCtrl'
 	});
 }])
-.controller('actGroupViewCtrl', ['$scope', '$http', function($scope, $http) {
+.controller('actGroupViewCtrl', ['$routeParams', '$scope', '$http', function($routeParams, $scope, $http) {
 
-	console.log('TODO To be implemented');
+	$scope.objDataUrl = `/_data/${$routeParams.actGroupId}`; 
+
+	$http.get($scope.objDataUrl).then(function(respActGrp) {
+		$scope.actGroup = respActGrp.data;		
+	})
+	
+	// TODO Set focus to name field
+	
+	$scope.save = function() {
+		// TODO Form validation
+		$http.put($scope.objDataUrl, JSON.stringify($scope.actGroup)).then(function(saveResp) {
+			// TODO Parse response, warn on error
+			window.location.href = '#!/act-grid';
+		});
+	}
 }]);
