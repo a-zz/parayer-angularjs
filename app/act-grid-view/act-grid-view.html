@@ -22,8 +22,9 @@
 			</td>
 			<td class="act-grid act-grid-cntnr-control">
 				<a href=""
-				 	class="act-grid-control" title="Add new {{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}" 
-				 	ng-if="activity.value.type!='Project'">
+				 	class="act-grid-control" title="Add new {{activity.value.type=='ActArea'?'group':'project'}}" 
+				 	ng-if="activity.value.type!='Project'"
+					onclick="alert('TODO To be implemented');">
 					&#10133;
 				</a>
 				<a href="#!/{{activity.value.type=='ActArea'?'act-area':activity.value.type=='ActGrp'?'act-group':'project'}}/{{activity.id}}" 
@@ -32,7 +33,8 @@
 				</a>				
 				<a href="" 
 					class="act-grid-control" 
-					title="Delete this {{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}">
+					title="Delete this {{activity.value.type=='ActArea'?'area':activity.value.type=='ActGrp'?'group':'project'}}"
+					onclick="alert('TODO To be implemented');">
 					&#128465;
 				</a>
 			</td>
