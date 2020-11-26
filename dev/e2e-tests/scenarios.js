@@ -2,7 +2,7 @@
 
 /* https://github.com/angular/protractor/blob/master/docs/toc.md */
 
-describe('my app', function() {
+describe('parayer', function() {
 
 
   /*it('should automatically redirect to /view1 when location hash/fragment is empty', function() {
@@ -23,7 +23,7 @@ describe('my app', function() {
         toMatch(/partial for view 1/);
     });
 
-  });*/
+  });
 
 
   describe('view2', function() {
@@ -38,5 +38,5 @@ describe('my app', function() {
         toMatch(/partial for view 2/);
     });
 
-  });
+  });*/
 });
