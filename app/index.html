@@ -6,24 +6,62 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>parayer</title>
+	<title>parayer :: a very humble project manager and time tracker</title>
 	<meta name="description" content="">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="lib/html5-boilerplate/dist/css/normalize.css">
-	<link rel="stylesheet" href="lib/html5-boilerplate/dist/css/main.css">
-	<link rel="stylesheet" href="app.css">
-	<script src="lib/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">	
+	<script src="lib/material-components-web/dist/material-components-web.js"></script>
+	<link rel="stylesheet" href="lib/material-components-web/dist/material-components-web.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> <!-- TODO npm-install locally, maybe? -->	
+	<link rel="stylesheet" href="app.css">	
 </head>
-<body>
+<body class="mdc-typography">
 	 <!--[if lt IE 7]>
 	    <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
 	
-	<div class="layout" "id="cntnr-main" ng-view></div>
-	
-	<div class="layout" id="cntnr-footer">
-		<hr>
-		parayer v<span app-version></span>
+	<header class="mdc-top-app-bar mdc-top-app-bar--fixed">
+		<div class="mdc-top-app-bar__row">
+			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+				<button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button" aria-label="Open navigation menu">menu</button>
+				<span class="mdc-top-app-bar__title"><span id="top-app-bar-nav-locator"></span></span>
+			</section>
+			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+				<span class="material-icons mdc-top-app-bar__action-item mdc-icon-button blinking" title="Please wait..." aria-label="Please wait..." 
+					id="wait-icon">hourglass_full</span>				
+			</section>
+		</div>
+	</header>
+	<aside class="mdc-drawer mdc-drawer--dismissible mdc-top-app-bar--fixed-adjust">
+    	<div class="mdc-drawer__content">
+			<div class="mdc-list">
+				<a class="mdc-list-item" href="#" aria-current="page">
+					<span class="mdc-list-item__ripple"></span>
+					<i class="material-icons mdc-list-item__graphic" aria-hidden="true">person</i>
+					<span class="mdc-list-item__text">About me</span>
+				</a>
+				<hr>
+				<a class="mdc-list-item mdc-list-item--activated" href="/#!/act-grid" aria-current="page">
+					<span class="mdc-list-item__ripple"></span>
+					<i class="material-icons mdc-list-item__graphic" aria-hidden="true">table_chart</i>
+					<span class="mdc-list-item__text">Activity grid</span>
+				</a>
+				<a class="mdc-list-item" href="#">
+					<span class="mdc-list-item__ripple"></span>
+					<i class="material-icons mdc-list-item__graphic" aria-hidden="true">send</i>
+					<span class="mdc-list-item__text">Outgoing</span>
+				</a>
+				<a class="mdc-list-item" href="#">
+					<span class="mdc-list-item__ripple"></span>
+					<i class="material-icons mdc-list-item__graphic" aria-hidden="true">drafts</i>
+					<span class="mdc-list-item__text">Drafts</span>
+				</a>
+				<p style="font-size: 70%; text-align: center;">parayer v<span app-version></span></p>
+			</div>
+		</div>
+	</aside>
+
+	<div class="mdc-drawer-app-content mdc-top-app-bar--fixed-adjust">
+		<main class="main-content" id="main-content" ng-view></main>
 	</div>
 	
 	<!-- In production use:
@@ -36,7 +74,6 @@
 	<script src="act-area-view/act-area-view.js"></script>
 	<script src="act-group-view/act-group-view.js"></script>
 	<script src="project-view/project-view.js"></script>
-	<script src="view2/view2.js"></script>
 	<script src="core/version/version.js"></script>
 	<script src="core/version/version-directive.js"></script>
 	<script src="core/version/interpolate-filter.js"></script>

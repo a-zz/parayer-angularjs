@@ -1,154 +1,36 @@
-/* parayer css stylesheet */
+/* ************************************************************************** *
+ * parayer :: main stylesheet                                                 *
+ * ************************************************************************** */
 
-/* Main layout */
-html, body {
-	margin: 0em;
-	padding: 0em;
+/* *** UI layout *** ******************************************************** */
+body {
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+header.mdc-top-app-bar {
+	z-index: 100;
+	top:0em; 
+	left:0em;
+}
+
+aside.mdc-drawer {
+	z-index: 99;
+}
+
+div.layout#cntnr-main {
+	margin-top: 10vh;
 	width: 100vw;
-	height: 100vh;
 }
-
-div.layout#main {
-	height: 80%;
+/* *** FX & animations *** ************************************************** */
+.blinking {
+    animation:blinkingText 1.2s infinite;
 }
-
-/* Activity grid */
-.act-grid { 
-	font-size: 10pt;
-	margin: 0em; 
-	border: none;
-	border-collapse: collapse;
-    border-spacing: 1px;
+@keyframes blinkingText{
+    0%{     opacity: 0.8; }
+    49%{    opacity: 0.8; }
+    60%{    opacity: 0.0; }
+    99%{    opacity: 0.0; }
+    100%{   opacity: 0.8; }
 }
-
-table.act-grid {
-	width: 98%;	
-	margin: 0.5em;
-	background: transparent;
-}
-
-thead.act-grid {
-	display: block;
-}
-
-tbody.act-grid { 
-	display: block; 
-}
-
-tbody.act-grid {
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-tr.act-grid {
-	pointer-events: none;	
-}
-
-tr.act-grid:hover td {	
-	background: lightyellow;	
-	opacity: 0.75;
-}
-th.act-grid {
-	width: 10%;
-}
-
-th.sum {
-	font-weight: bold;
-}
-
-th.today {
-	color: darkorange;
-}
-
-td.act-grid {
-	pointer-events: auto;
-}
-
-input.act-grid-label-area { 
-	margin-left: 0.5em;
-	margin-right: 0pt; 
-	font-weight: bold; 
-}
-
-input.act-grid-label-group { 
-	margin-left: 1.5em;
-	margin-right: 0em;
-}
-
-input.act-grid-label-project { 
-	margin-left: 2.5em; 
-	margin-right: 0em;
-	font-style: italic; 
-}
-
-input.act-grid-label {
-	border: none;
-	padding-right: 0em;
-	background: transparent;
-}
-
-input.act-grid-label:focus {
-	border: none;	
-	border-bottom: 1px dashed orange;
-	background-color: lightyellow;
-}
-
-td.act-grid-cntnr-control {
-	text-align: right;
-	width: 5em;
-	opacity: 0.05;
-	float: right;
-}
-
-.act-grid-control {
-	text-decoration: none;
-	margin: none;
-	padding: 0.1em;
-	border: 1px solid transparent;
-	border-radius: 0.3em;
-}
-
-.act-grid-control:hover {
-	text-decoration: none;
-	border: 1px solid lightgrey;
-	cursor: pointer;
-}
-
-td.effort {
-	border: 1px solid lightgrey;
-}
-
-td.effort:hover .effort-control {	
-	opacity: 0.75;
-}
-
-.effort-control {
-	opacity: 0.05;
-	margin: none;
-	padding: 0.1em;
-	border: 1px solid transparent;
-	border-radius: 0.3em;
-}
-
-.effort-control:hover {
-	border: 1px solid lightgrey;
-	cursor: pointer;
-} 
-
-td.sum {
-	font-weight: bold;
-}
-
-input.act-grid-effort {
-	background: transparent;
-	border: none;
-	padding: 0.1em;
-	width: 3em;
-	text-align: right;
-}
-
-input.act-grid-effort:focus {
-	border: none;	
-	border-bottom: 1px dashed orange;
-	background-color: lightyellow;
-}
+/* ************************************************************************** */

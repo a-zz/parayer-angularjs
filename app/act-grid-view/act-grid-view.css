@@ -1,0 +1,139 @@
+.act-grid { 
+	font-size: 10pt;
+	margin: 0em; 
+	border: none;
+	border-collapse: collapse;
+    border-spacing: 1px;
+}
+
+table.act-grid {
+	width: 95%;	
+	margin: 0.5em;
+	background: transparent;
+}
+
+thead.act-grid {
+	display: block;
+}
+
+tbody.act-grid { 
+	display: block; 
+}
+
+tbody.act-grid {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+tr.act-grid {
+	pointer-events: none;	
+}
+
+tr.act-grid:hover td {	
+	background: lightyellow;	
+	opacity: 0.75;
+}
+th.act-grid {
+	width: 10%;
+}
+
+th.sum {
+	font-weight: bold;
+}
+
+th.today {
+	color: darkorange;
+}
+
+td.act-grid {
+	pointer-events: auto;
+}
+
+input.act-grid-label-area { 
+	margin-left: 0.5em;
+	margin-right: 0pt; 
+	font-weight: bold; 
+}
+
+input.act-grid-label-group { 
+	margin-left: 1.5em;
+	margin-right: 0em;
+}
+
+input.act-grid-label-project { 
+	margin-left: 2.5em; 
+	margin-right: 0em;
+	font-style: italic; 
+}
+
+input.act-grid-label {
+	border: none;
+	padding-right: 0em;
+	background: transparent;
+}
+
+input.act-grid-label:focus {
+	border: none;	
+	border-bottom: 1px dashed orange;
+	background-color: lightyellow;
+}
+
+td.act-grid-cntnr-control {
+	text-align: right;
+	width: 5em;
+	opacity: 0.05;
+	float: right;
+}
+
+.act-grid-control {
+	text-decoration: none;
+	margin: none;
+	padding: 0.1em;
+	border: 1px solid transparent;
+	border-radius: 0.3em;
+}
+
+.act-grid-control:hover {
+	text-decoration: none;
+	border: 1px solid lightgrey;
+	cursor: pointer;
+}
+
+td.effort {
+	border: 1px solid lightgrey;
+}
+
+td.effort:hover .effort-control {	
+	opacity: 0.75;
+}
+
+.effort-control {
+	opacity: 0.05;
+	margin: none;
+	padding: 0.1em;
+	border: 1px solid transparent;
+	border-radius: 0.3em;
+}
+
+.effort-control:hover {
+	border: 1px solid lightgrey;
+	cursor: pointer;
+} 
+
+td.sum {
+	font-weight: bold;
+}
+
+input.act-grid-effort {
+	background: transparent;
+	border: none;
+	padding: 0.1em;
+	width: 3em;
+	text-align: right;
+}
+
+input.act-grid-effort:focus {
+	border: none;	
+	border-bottom: 1px dashed orange;
+	background-color: lightyellow;
+}

@@ -11,14 +11,23 @@ angular.module('parayer.actAreaView', ['ngRoute'])
 }])
 .controller('actAreaViewCtrl', ['$routeParams', '$scope', '$http', function($routeParams, $scope, $http) {
 
-	$scope.objDataUrl = `/_data/${$routeParams.actAreaId}`; 
+	// UI setup	
+	ui.setLocation('Activity area');
+	new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field#name'));
+	new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field#descr'));
+	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#submit'));
+	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#cancel'));
+	document.querySelector('.mdc-text-field#name').focus();
 
+	// Scope initialization
+	var _usrId_ = '3602049025343d92386f90135b000f1e'; // TODO This should be global (or cookie-set?)
+	$scope.objDataUrl = `/_data/${$routeParams.actAreaId}`; 
 	$http.get($scope.objDataUrl).then(function(respActArea) {
-		$scope.actArea = respActArea.data;		
-	})
+		$scope.actArea = respActArea.data;
+		ui.showWait(false);
+	});
 	
-	// TODO Set focus to name field
-	
+	// Event handlers
 	$scope.save = function() {
 		// TODO Form validation
 		$http.put($scope.objDataUrl, JSON.stringify($scope.actArea)).then(function(saveResp) {
