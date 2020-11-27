@@ -22,6 +22,16 @@ div.layout#cntnr-main {
 	margin-top: 10vh;
 	width: 100vw;
 }
+
+/* *** Data entry forms *** ************************************************* */
+div.deform {
+	padding: 0.5em;
+}
+
+div.detab {
+	display: none;
+}
+
 /* *** FX & animations *** ************************************************** */
 .blinking {
     animation:blinkingText 1.2s infinite;

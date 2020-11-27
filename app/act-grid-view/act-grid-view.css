@@ -1,3 +1,7 @@
+/* ************************************************************************** *
+ * parayer :: activity grid stylesheet                                        *
+ * ************************************************************************** */
+
 .act-grid { 
 	font-size: 10pt;
 	margin: 0em; 
@@ -137,3 +141,4 @@ input.act-grid-effort:focus {
 	border-bottom: 1px dashed orange;
 	background-color: lightyellow;
 }
+/* ************************************************************************** */

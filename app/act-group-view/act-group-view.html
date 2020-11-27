@@ -1,5 +1,5 @@
 <form class="properties" ng-controller="actGroupViewCtrl" ng-submit="save();">	
-	<div>
+	<div class="deform">
 		<label class="mdc-text-field mdc-text-field--filled" id="name">
 			<span class="mdc-text-field__ripple"></span>
 			<span class="mdc-floating-label" id="name-label">Name</span>
@@ -8,7 +8,7 @@
 			<span class="mdc-line-ripple"></span>
 		</label>
 	</div>
-	<div>
+	<div class="deform">
 		<label class="mdc-text-field mdc-text-field--filled" id="descr">
 			<span class="mdc-text-field__ripple"></span>
 			<span class="mdc-floating-label" id="descr-label">Description</span>
@@ -16,11 +16,11 @@
 			<span class="mdc-line-ripple"></span>
 		</label>
 	</div>
-	<div>
+	<div class="deform">
 		<span class="properties">{{actGroup.usrAdminList}} (TODO)</span><br>
 		<span class="properties">{{actGroup.usrAssignList}} (TODO)</span><br>
 	</div>
-	<div>
+	<div class="deform">
 		<button class="mdc-button mdc-button--raised" id="submit" title="Ok!" tabindex="11" ng-click="save();">
 	  		<span class="mdc-button__label">Save</span>
 		</button>
