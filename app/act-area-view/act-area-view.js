@@ -12,12 +12,12 @@ angular.module('parayer.actAreaView', ['ngRoute'])
 .controller('actAreaViewCtrl', ['$routeParams', '$scope', '$http', function($routeParams, $scope, $http) {
 
 	// UI setup	
+	// TODO Add input fields validation (see: https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples)
 	ui.setLocation('Activity area');
 	new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field#name'));
 	new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field#descr'));
 	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#submit'));
 	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#cancel'));
-	document.querySelector('.mdc-text-field#name').focus();
 
 	// Scope initialization
 	var _usrId_ = '3602049025343d92386f90135b000f1e'; // TODO This should be global (or cookie-set?)
