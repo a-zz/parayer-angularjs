@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="project-view/project-view.css">
 <div class="mdc-tab-scroller__scroll-content">
-	<button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="1" id="tab-general">
+	<button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="100" id="tab-general">
 		<span class="mdc-tab__content">
 			<span class="mdc-tab__text-label">General</span>
 		</span>
@@ -10,7 +10,7 @@
 		<span class="mdc-tab__ripple mdc-ripple-upgraded"></span>
 	</button>		
 		
-	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="11" id="tab-notes">
+	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="200" id="tab-notes">
 		<span class="mdc-tab__content">
 			<span class="mdc-tab__text-label">Notes</span>
 		</span>
@@ -20,7 +20,7 @@
 		<span class="mdc-tab__ripple mdc-ripple-upgraded"></span>
 	</button>
 	
-	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="21" id="tab-tasks">
+	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="300" id="tab-tasks">
 		<span class="mdc-tab__content">
 			<span class="mdc-tab__text-label">Tasks</span>
 		</span>
@@ -30,7 +30,7 @@
 		<span class="mdc-tab__ripple mdc-ripple-upgraded"></span>
 	</button>		
 	
-	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="31" id="tab-files">
+	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="400" id="tab-files">
 		<span class="mdc-tab__content">
 			<span class="mdc-tab__text-label">Files</span>
 		</span>
@@ -40,7 +40,7 @@
 		<span class="mdc-tab__ripple mdc-ripple-upgraded"></span>
 	</button>		
 	
-	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="41" id="tab-appointments">
+	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="500" id="tab-appointments">
 		<span class="mdc-tab__content">
 			<span class="mdc-tab__text-label">Appointments</span>
 		</span>
@@ -50,7 +50,7 @@
 		<span class="mdc-tab__ripple mdc-ripple-upgraded"></span>
 	</button>	
 	
-	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="51" id="tab-history">
+	<button class="mdc-tab" role="tab" aria-selected="true" tabindex="600" id="tab-history">
 		<span class="mdc-tab__content">
 			<span class="mdc-tab__text-label">History</span>
 		</span>
@@ -61,10 +61,78 @@
 	</button>
 </div>
 <div id="decntnr-cntnr">
-	<div class="detab" id="tab-general-decntnr" style="display:contents;">[General]</div>
+	<div class="detab" id="tab-general-decntnr" style="display:contents;">
+		<form class="properties" ng-controller="projectViewCtrl" ng-submit="save();">	
+			<div class="deform">
+				<label class="mdc-text-field mdc-text-field--filled" id="name">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="name-label">Name</span>
+					<input class="mdc-text-field__input" id="name" type="text" value=" " ng-model="project.name" aria-labelledby="name-label" tabindex="101" 
+						placeholder="(required)" autofocus="autofocus">
+					<span class="mdc-line-ripple"></span>
+				</label>
+			</div>
+			<div class="deform">
+				<label class="mdc-text-field mdc-text-field--filled" id="descr">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="descr-label">Description</span>
+					<input class="mdc-text-field__input" id="descr" type="text" value=" " ng-model="project.descr" aria-labelledby="descr-label" tabindex="102">
+					<span class="mdc-line-ripple"></span>
+				</label>
+			</div>
+			<div class="deform">
+				<span class="properties">{{project.actGroup}} (TODO)</span><br>
+				<span class="properties">{{project.usrAdminList}} (TODO)</span><br>
+				<span class="properties">{{project.usrAssignList}} (TODO)</span><br>
+			</div>
+			<div class="deform">
+				<label class="mdc-text-field mdc-text-field--filled" id="date-start">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="date-start-label">Start date</span>
+					<input class="mdc-text-field__input" id="date-start" type="date" ng-model="project.dateStart" aria-labelledby="date-start-label" 
+						tabindex="106" onblur="console.log(this.value);">
+					<span class="mdc-line-ripple"></span>
+				</label>&nbsp;<label class="mdc-text-field mdc-text-field--filled" id="date-end">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="date-end-label">End date</span>
+					<input class="mdc-text-field__input" id="date-end" type="date" ng-model="project.dateEnd" aria-labelledby="date-end-label" 
+						tabindex="107">
+					<span class="mdc-line-ripple"></span>
+				</label>
+			</div>
+			<div class="deform">
+				<label class="mdc-text-field mdc-text-field--filled" id="effort-unit">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="effort-unit-label">Effort unit</span>
+					<input class="mdc-text-field__input" id="effort-unit" type="time" ng-model="project.effortUnit" aria-labelledby="effort-unit-label" 
+						tabindex="108">
+					<span class="mdc-line-ripple"></span>
+				</label>&nbsp;<label class="mdc-text-field mdc-text-field--filled" id="effort-cap">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="effort-cap-label">Effort cap</span>
+					<input class="mdc-text-field__input" id="effort-cap" type="time" ng-model="project.effortCap" aria-labelledby="effort-cap-label" 
+						tabindex="109">
+					<span class="mdc-line-ripple"></span>
+				</label>
+			</div>			
+			<div class="deform">
+				<button class="mdc-button mdc-button--raised" id="submit" title="Ok!" tabindex="198" ng-click="save();">
+			  		<span class="mdc-button__label">Save</span>
+				</button>
+				<button class="mdc-button mdc-button--outlined" id="cancel" title="Discard changes and go back" tabindex="199" onclick="window.history.back();">
+			  		<span class="mdc-button__label">Cancel</span>
+				</button>
+			</div>
+		</form>		
+	</div>
+	
 	<div class="detab" id="tab-notes-decntnr">[Notes]</div>
+	
 	<div class="detab" id="tab-tasks-decntnr">[Tasks]</div>
+	
 	<div class="detab" id="tab-files-decntnr">[Files]</div>
+	
 	<div class="detab" id="tab-appointments-decntnr">[Appointments]</div>
+	
 	<div class="detab" id="tab-history-decntnr">[History]</div>
 </div>
