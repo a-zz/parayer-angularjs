@@ -7,10 +7,13 @@
 	"loggerOpts": { 
 		"timestampFormat": "YYYY-MM-DD HH:mm:ss.SSS" 
 	},
-	"couchDbHost": "192.168.43.254",
-	"couchDbPort": 5984,
-	"couchDbDb": "parayer",
-	"couchDbUser": "parayer",
-	"couchDbPwd": "parayer"
+	"couchDb": {
+		"host": "localhost",
+		"port": 5984,
+		"db": "parayer",
+		"user": "parayer",
+		"pwd": "parayer",
+		"strict": true
+	}
 }
 /* ********************************************************************************************************************************************************** */

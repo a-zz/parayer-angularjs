@@ -10,6 +10,7 @@
 // TODO Cookie authentication (and re-) for CouchDB
 
 /* *** Server dependencies and configuration *** ************************************************************************************************************ */
+const	__ajv__		= require('ajv');		// JSON schema validator
 const 	__express__	= require('express');	// HTTP server
 const 	__http__ 	= require('http');		// HTTP client, asynchronous
 const 	__retus__ 	= require("retus");		// HTTP client, synchronous
@@ -42,12 +43,12 @@ _server_.get(dbRequestPrefix + '/*', function(req, res) {
 	
 	let couchdbQueryString = req.url.substring(dbRequestPrefix.length); 
 	let httpOptions = {
-    	host: _config_.couchDbHost,
-    	port: _config_.couchDbPort,
-    	path: '/' + _config_.couchDbDb + couchdbQueryString,
+    	host: _config_.couchDb.host,
+    	port: _config_.couchDb.port,
+    	path: '/' + _config_.couchDb.db + couchdbQueryString,
     	method: 'GET',
 		headers: {
-			'authorization': _config_.couchDbAuthHeader
+			'authorization': _config_.couchDb.authHeader
 		}
   	};
 	let httpReq = __http__.request(httpOptions, function(httpResp) {
@@ -71,7 +72,7 @@ _server_.get(dbRequestPrefix + '/*', function(req, res) {
 
 _server_.put(dbRequestPrefix + '/*', function(req, res) {
 	
-	// TODO Object validation required
+	validate(req.body);
 	
 	let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
         return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
@@ -79,12 +80,12 @@ _server_.put(dbRequestPrefix + '/*', function(req, res) {
 	
 	let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
 	let httpOptions = {
-    	host: _config_.couchDbHost,
-    	port: _config_.couchDbPort,
-    	path: '/' + _config_.couchDbDb + couchdbQueryString,
+    	host: _config_.couchDb.host,
+    	port: _config_.couchDb.port,
+    	path: '/' + _config_.couchDb.db + couchdbQueryString,
     	method: 'PUT',
 		headers: {
-			'authorization': _config_.couchDbAuthHeader,
+			'authorization': _config_.couchDb.authHeader,
 			'Content-Type': 'application/json; charset=utf-8',
     		'Content-Length': putData.length
 		}
@@ -150,32 +151,32 @@ function initDbConnection() {
 
 	let readyToGo = true;
 		
-	_config_.couchDbServerUrl = `http://${_config_.couchDbHost}:${_config_.couchDbPort}`;
-	_config_.parayerDbUrl = `${_config_.couchDbServerUrl}/${_config_.couchDbDb}`;
-	_config_.couchDbAuthHeader = 'Basic ' + Buffer.from(_config_.couchDbUser + ':' + _config_.couchDbPwd).toString('base64');
+	_config_.couchDb.serverUrl = `http://${_config_.couchDb.host}:${_config_.couchDb.port}`;
+	_config_.parayerDbUrl = `${_config_.couchDb.serverUrl}/${_config_.couchDb.db}`;
+	_config_.couchDb.authHeader = 'Basic ' + Buffer.from(_config_.couchDb.user + ':' + _config_.couchDb.pwd).toString('base64');
 		
-	if(_config_.couchDbByPassInitCheck) {
+	if(_config_.couchDb.byPassInitCheck) {
 		_log_.debug('Bypassing init db check as ordered (--bypass-init-db-check)');
 		return true;
 	}
 		
 	if(readyToGo) { // Check for: CouchDB server running, and its version		
 		try {
-			let { body } = __retus__(_config_.couchDbServerUrl, {'method': 'get', 'responseType': 'json'});
-			_log_.trace(`CouchDB query ${_config_.couchDbServerUrl} returned: ` + JSON.stringify(body));
+			let { body } = __retus__(_config_.couchDb.serverUrl, {'method': 'get', 'responseType': 'json'});
+			_log_.trace(`CouchDB query ${_config_.couchDb.serverUrl} returned: ` + JSON.stringify(body));
 			if(body.couchdb==null) {
-				_log_.fatal(`Got a valid response from ${_config_.couchDbServerUrl}, but doesn't look like CouchDB's'...`)
+				_log_.fatal(`Got a valid response from ${_config_.couchDb.serverUrl}, but doesn't look like CouchDB's'...`)
 				readyToGo = false;
 			}
 			else if(!body.version.startsWith('3')) {
-				_log_.fatal(`CouchDB version at ${_config_.couchDbServerUrl} is ${body.version}; supported version is 3.x.x`);
+				_log_.fatal(`CouchDB version at ${_config_.couchDb.serverUrl} is ${body.version}; supported version is 3.x.x`);
 				readyToGo = false;
 			}
 			else
 				_log_.debug(`Checked CouchDb server and its version: OK`);
 		}
 		catch(err) {
-			_log_.fatal(`Couldn't connect to CouchDB server at ${_config_.couchDbServerUrl}: ${err}`);
+			_log_.fatal(`Couldn't connect to CouchDB server at ${_config_.couchDb.serverUrl}: ${err}`);
 			readyToGo = false;
 		}		
 	}
@@ -186,7 +187,7 @@ function initDbConnection() {
 				'method':'get', 
 				'responseType': 'json', 
 				headers: {
-					'authorization': _config_.couchDbAuthHeader
+					'authorization': _config_.couchDb.authHeader
 				}
 			});
 			_log_.debug(`Checked whether parayer db is available: OK`);
@@ -195,7 +196,7 @@ function initDbConnection() {
 			switch(err.statusCode) {
 			case 401:
 				_log_.fatal(`Couldn't connect to parayer db at ${_config_.parayerDbUrl}: ` +
-						`most likey because of bad auth (${_config_.couchDbAuthHeader}): ${err}`);
+						`most likey because of bad auth (${_config_.couchDb.authHeader}): ${err}`);
 				break;
 			case 404:
 				_log_.fatal(`Couldn't connect to parayer db at ${_config_.parayerDbUrl}: ` +
@@ -215,7 +216,7 @@ function initDbConnection() {
 				'method':'get', 
 				'responseType': 'json',
 				headers: {
-					'authorization': _config_.couchDbAuthHeader
+					'authorization': _config_.couchDb.authHeader
 				}
 			});
 			_log_.trace(`CouchDB query ${parayerDBVersionUrl} returned: ` + JSON.stringify(body));
@@ -228,7 +229,7 @@ function initDbConnection() {
 				readyToGo = false;
 			}
 			else
-				_log_.debug(`Checked for matching parayer db version: OK (${_config_.parayerDbUrl}, authorization header: ${_config_.couchDbAuthHeader})`);
+				_log_.debug(`Checked for matching parayer db version: OK (${_config_.parayerDbUrl}, authorization header: ${_config_.couchDb.authHeader})`);
 		}
 		catch(err) {
 			switch(err.statusCode) {
@@ -250,13 +251,20 @@ function initDbConnection() {
 	else
 		return true;
 }
+
+/* *** Data (schema-based) validation *** ******************************************************************************************************************* */
+function validate(object) {
+
+	// TODO Check object per type; throw on error, return void on success
+}
+
 /* *** Utilities *** **************************************************************************************************************************************** */
 function parseCmdLineArgs() {
 	
 	var inTrouble = false;
 	for(let i = 2; i<process.argv.length; i++) {
 		if(process.argv[i]=='--bypass-init-db-check')
-			_config_.couchDbByPassInitCheck = true;
+			_config_.couchDb.byPassInitCheck = true;
 		else
 			inTrouble = true;
 	}
