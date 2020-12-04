@@ -22,99 +22,111 @@ const 	_log_ 		= require('simple-node-logger').createSimpleLogger(_config_.logge
 /* *** Start-up procedure *** ******************************************************************************************************************************* */
 parseCmdLineArgs();
 const 	_server_ 	= initServer();
+if(_server_==null) 
+	setTimeout(() => process.exit(11), 1); // TODO Exit error codes to be defined
+else {
 
-/* *** Service definitions *** ****************************************************************************************************************************** */
-/* Static contents (i.e. angular-js frontend files) served from app/ subdir */
-_server_.use(__express__.static('app'));
+	/* *** Service definitions *** ************************************************************************************************************************** */
+	/* Static contents (i.e. angular-js frontend files) served from app/ subdir */
+	_server_.use(__express__.static('app'));
 
-/* User authentication service */
-// TODO User auth to be implemented
-_server_.get('/_usrauth', function(req, res) {
-	
-	_log_.info('User authentication request ' + req.url + ': to be implemented!');
-    res.send('User authentication request ' + req.url + ': to be implemented!');
-});
-
-/* Data requests (to be redirected to CouchDB server) */
-const dbRequestPrefix = '/_data';
-_server_.get(dbRequestPrefix + '/*', function(req, res) {
-	
-	// TODO Data access permission check required
-	
-	let couchdbQueryString = req.url.substring(dbRequestPrefix.length); 
-	let httpOptions = {
-    	host: _config_.couchDb.host,
-    	port: _config_.couchDb.port,
-    	path: '/' + _config_.couchDb.db + couchdbQueryString,
-    	method: 'GET',
-		headers: {
-			'authorization': _config_.couchDb.authHeader
-		}
-  	};
-	let httpReq = __http__.request(httpOptions, function(httpResp) {
+	/* User authentication service */
+	// TODO User auth to be implemented
+	_server_.get('/_usrauth', function(req, res) {
 		
-		let httpRespData = '';
-    	httpResp.setEncoding('utf8');
-		httpResp.on('data', function(chunk) {
-			httpRespData += chunk;
-		});
-	    httpResp.on('end', function() {
-			// TODO Parse httpRespData for error messages, log accordingly
-      		_log_.debug(_log_.info(`db GET request to ${couchdbQueryString}`));
-			_log_.trace('db returned '+ httpRespData);
-    		res.send(httpRespData);
-    	})
-  	}).on("error", function(err) {
-  		_log_.error(`db GET request ${couchdbQueryString}: ${err.message}`);
+		_log_.info('User authentication request ' + req.url + ': to be implemented!');
+	    res.send('User authentication request ' + req.url + ': to be implemented!');
 	});
-    httpReq.end();
-});
 
-_server_.put(dbRequestPrefix + '/*', function(req, res) {
-	
-	validate(req.body);
-	
-	let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
-        return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
-    });
-	
-	let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
-	let httpOptions = {
-    	host: _config_.couchDb.host,
-    	port: _config_.couchDb.port,
-    	path: '/' + _config_.couchDb.db + couchdbQueryString,
-    	method: 'PUT',
-		headers: {
-			'authorization': _config_.couchDb.authHeader,
-			'Content-Type': 'application/json; charset=utf-8',
-    		'Content-Length': putData.length
-		}
-  	};
-	let httpReq = __http__.request(httpOptions, function(httpResp) {
+	/* Data requests (to be redirected to CouchDB server) */
+	const dbRequestPrefix = '/_data';
+	_server_.get(dbRequestPrefix + '/*', function(req, res) {
 		
-		let httpRespData = '';
-    	httpResp.setEncoding('utf8');
-		httpResp.on('data', function(chunk) {
-			httpRespData += chunk;
+		// TODO Data access permission check required
+		
+		let couchdbQueryString = req.url.substring(dbRequestPrefix.length); 
+		let httpOptions = {
+	    	host: _config_.couchDb.host,
+	    	port: _config_.couchDb.port,
+	    	path: '/' + _config_.couchDb.db + couchdbQueryString,
+	    	method: 'GET',
+			headers: {
+				'authorization': _config_.couchDb.authHeader
+			}
+	  	};
+		let httpReq = __http__.request(httpOptions, function(httpResp) {
+			
+			let httpRespData = '';
+	    	httpResp.setEncoding('utf8');
+			httpResp.on('data', function(chunk) {
+				httpRespData += chunk;
+			});
+			_log_.info(`db GET request to ${couchdbQueryString}`);
+		    httpResp.on('end', function() {
+				// TODO Parse httpRespData for error messages, log accordingly
+				_log_.trace('db returned '+ httpRespData);
+				if(_config_.couchDb.strict) { 
+					try {
+						dbSchemaValidation(couchdbQueryString, httpRespData);
+						res.send(httpRespData);
+					}
+					catch(e) {
+						_log_.error(e);
+					}
+	    		}
+	    	})
+	  	}).on("error", function(err) {
+	  		_log_.error(`db GET request ${couchdbQueryString}: ${err.message}`);
 		});
-	    httpResp.on('end', function() {
-			// TODO Parse httpRespData for error messages, log accordingly
-      		_log_.debug(`db PUT request to ${couchdbQueryString} : (data: ${putData})`);
-			_log_.trace('db returned '+ httpRespData);
-    		res.send(httpRespData);
-    	})
-  	}).on("error", function(err) {
-  		_log_.error('db PUT request ' + couchdbQueryString + ': ' + err.message);
+	    httpReq.end();
 	});
-	httpReq.write(putData);
-    httpReq.end();
-});
-
-/* Test service */ 
-_server_.get('/_test', function(req, res) {
 	
-    res.send({'message': 'It works! :)', 'version': _appVer_ });
-});
+	_server_.put(dbRequestPrefix + '/*', function(req, res) {
+		
+		dbSchemaValidation(req.body);
+		
+		let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
+	        return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
+	    });
+		
+		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
+		let httpOptions = {
+	    	host: _config_.couchDb.host,
+	    	port: _config_.couchDb.port,
+	    	path: '/' + _config_.couchDb.db + couchdbQueryString,
+	    	method: 'PUT',
+			headers: {
+				'authorization': _config_.couchDb.authHeader,
+				'Content-Type': 'application/json; charset=utf-8',
+	    		'Content-Length': putData.length
+			}
+	  	};
+		let httpReq = __http__.request(httpOptions, function(httpResp) {
+			
+			let httpRespData = '';
+	    	httpResp.setEncoding('utf8');
+			httpResp.on('data', function(chunk) {
+				httpRespData += chunk;
+			});
+		    httpResp.on('end', function() {
+				// TODO Parse httpRespData for error messages, log accordingly
+	      		_log_.debug(`db PUT request to ${couchdbQueryString} : (data: ${putData})`);
+				_log_.trace('db returned '+ httpRespData);
+	    		res.send(httpRespData);
+	    	})
+	  	}).on("error", function(err) {
+	  		_log_.error('db PUT request ' + couchdbQueryString + ': ' + err.message);
+		});
+		httpReq.write(putData);
+	    httpReq.end();
+	});
+	
+	/* Test service */ 
+	_server_.get('/_test', function(req, res) {
+		
+	    res.send({'message': 'It works! :)', 'version': _appVer_ });
+	});
+}
 
 /* *** Initialization procedure *** ************************************************************************************************************************* */
 function initServer() {
@@ -134,7 +146,9 @@ function initServer() {
 		});
 		server.use(__express__.json());
 		return server;
-	}		
+	}
+	else
+		return null;
 }
 
 function welcomeMsg() {
@@ -224,7 +238,7 @@ function initDbConnection() {
 				_log_.fatal(`parayer db at ${_config_.parayerDbUrl} is unversioned, refusing to accept it`);
 				readyToGo = false;
 			}
-			else if(body.rows[0].value!=_appVer_) {
+			else if(!_appVer_.startsWith(`${body.rows[0].value.major}.${body.rows[0].value.minor}`)) {
 				_log_.fatal(`parayer db at ${_config_.parayerDbUrl} doesn't match app version ${_appVer_} (got ${body.rows[0].value})`);
 				readyToGo = false;
 			}
@@ -243,19 +257,44 @@ function initDbConnection() {
 		}				
 	}
 	
-	// All done
-	if(!readyToGo) {
-		setTimeout(() => process.exit(11), 1); // TODO Exit error codes to be defined
-		return false;
-	}
-	else
-		return true;
+	return readyToGo;
 }
 
 /* *** Data (schema-based) validation *** ******************************************************************************************************************* */
-function validate(object) {
+function dbSchemaValidation(couchDbQueryString, data) {
 
-	// TODO Check object per type; throw on error, return void on success
+	if(couchDbQueryString.indexOf('_view')!=-1) {
+		// TODO Loop through view rows
+		console.log('It\'s a view!');
+	}
+	else {
+		const ajv = new __ajv__({ allErrors: true });
+		const obj = JSON.parse(data);
+		let schemaFile = './schema/';
+		switch(obj.type) {
+		case 'ActArea':
+			schemaFile += 'act-area';
+			break;
+		case 'ActGrp':
+			schemaFile += 'act-grp';
+			break;
+		case 'Project':
+			schemaFile += 'project';
+			break;			
+		case 'Usr':
+			schemaFile += 'usr';
+			break;			
+		default:
+			throw `Schema validation failed: object type unknown or undefined for ${couchDbQueryString}`;
+		}	
+		schemaFile += '.schema.json';
+		const schema = require(schemaFile);
+		if(ajv.validate(schema, obj)) // FIXME It's logging twice!???'
+			_log_.debug(`Object returned by ${couchDbQueryString} is fine according to schema from ${schemaFile}`);
+		else
+			throw `Object returned by ${couchDbQueryString} failed to validate against schema from ${schemaFile}: ${JSON.stringify(ajv.errors)}`;
+			// TODO User-friendly error string, please!
+	}	
 }
 
 /* *** Utilities *** **************************************************************************************************************************************** */
