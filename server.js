@@ -83,13 +83,18 @@ else {
 	
 	_server_.put(dbRequestPrefix + '/*', function(req, res) {
 		
-		dbSchemaValidation(req.body);
-		
+		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);		
 		let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
 	        return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
 	    });
+		try {
+			dbSchemaValidation(couchdbQueryString, putData);
+		}
+		catch(e) {
+			_log_.error(e);
+			return;
+		}
 		
-		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
 		let httpOptions = {
 	    	host: _config_.couchDb.host,
 	    	port: _config_.couchDb.port,
@@ -290,9 +295,9 @@ function dbSchemaValidation(couchDbQueryString, data) {
 		schemaFile += '.schema.json';
 		const schema = require(schemaFile);
 		if(ajv.validate(schema, obj)) // FIXME It's logging twice!???'
-			_log_.debug(`Object returned by ${couchDbQueryString} is fine according to schema from ${schemaFile}`);
+			_log_.debug(`Object related to db URL ${couchDbQueryString} is fine according to schema from ${schemaFile}`);
 		else
-			throw `Object returned by ${couchDbQueryString} failed to validate against schema from ${schemaFile}: ${JSON.stringify(ajv.errors)}`;
+			throw `Object related to db URL ${couchDbQueryString} failed to validate against schema from ${schemaFile}: ${JSON.stringify(ajv.errors)}`;
 			// TODO User-friendly error string, please!
 	}	
 }
