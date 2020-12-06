@@ -4,6 +4,14 @@
 	"title": "Db object type ActGrp",
 	"type": "object",
 	"properties": {
+		"_id": {
+			"type": "string",
+			"pattern": "[a-f0-9]{32}"
+		},
+		"_rev": {
+			"type": "string",
+			"pattern": "[0-9]+-[a-f0-9]{32}"
+		},	
 		"name": {
 			"type": "string",
 			"minLength": 1
