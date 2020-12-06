@@ -65,15 +65,16 @@ else {
 		    httpResp.on('end', function() {
 				// TODO Parse httpRespData for error messages, log accordingly
 				_log_.trace('db returned '+ httpRespData);
-				if(_config_.couchDb.strict) { 
+				if(_config_.couchDb.strict && couchdbQueryString.indexOf('_view')==-1) { 
 					try {
 						dbSchemaValidation(couchdbQueryString, httpRespData);
-						res.send(httpRespData);
 					}
 					catch(e) {
 						_log_.error(e);
+						return;
 					}
 	    		}
+				res.send(httpRespData);
 	    	})
 	  	}).on("error", function(err) {
 	  		_log_.error(`db GET request ${couchdbQueryString}: ${err.message}`);
@@ -268,38 +269,32 @@ function initDbConnection() {
 /* *** Data (schema-based) validation *** ******************************************************************************************************************* */
 function dbSchemaValidation(couchDbQueryString, data) {
 
-	if(couchDbQueryString.indexOf('_view')!=-1) {
-		// TODO Loop through view rows
-		console.log('It\'s a view!');
-	}
-	else {
-		const ajv = new __ajv__({ allErrors: true });
-		const obj = JSON.parse(data);
-		let schemaFile = './schema/';
-		switch(obj.type) {
-		case 'ActArea':
-			schemaFile += 'act-area';
-			break;
-		case 'ActGrp':
-			schemaFile += 'act-grp';
-			break;
-		case 'Project':
-			schemaFile += 'project';
-			break;			
-		case 'Usr':
-			schemaFile += 'usr';
-			break;			
-		default:
-			throw `Schema validation failed: object type unknown or undefined for ${couchDbQueryString}`;
-		}	
-		schemaFile += '.schema.json';
-		const schema = require(schemaFile);
-		if(ajv.validate(schema, obj)) // FIXME It's logging twice!???'
-			_log_.debug(`Object related to db URL ${couchDbQueryString} is fine according to schema from ${schemaFile}`);
-		else
-			throw `Object related to db URL ${couchDbQueryString} failed to validate against schema from ${schemaFile}: ${JSON.stringify(ajv.errors)}`;
-			// TODO User-friendly error string, please!
+	const ajv = new __ajv__({ allErrors: true });
+	const obj = JSON.parse(data);
+	let schemaFile = './schema/';
+	switch(obj.type) {
+	case 'ActArea':
+		schemaFile += 'act-area';
+		break;
+	case 'ActGrp':
+		schemaFile += 'act-grp';
+		break;
+	case 'Project':
+		schemaFile += 'project';
+		break;			
+	case 'Usr':
+		schemaFile += 'usr';
+		break;			
+	default:
+		throw `Schema validation failed: object type unknown or undefined for ${couchDbQueryString}`;
 	}	
+	schemaFile += '.schema.json';
+	const schema = require(schemaFile);
+	if(ajv.validate(schema, obj)) // FIXME It's logging twice!???'
+		_log_.debug(`Object related to ${couchDbQueryString} is fine according to schema from ${schemaFile}`);
+	else
+		throw `Object related to ${couchDbQueryString} failed to validate against schema from ${schemaFile}: ${JSON.stringify(ajv.errors)}`;
+		// TODO User-friendly error string, please!	
 }
 
 /* *** Utilities *** **************************************************************************************************************************************** */
