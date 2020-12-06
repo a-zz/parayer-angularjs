@@ -1,4 +1,33 @@
 { 
 	"$schema": "http://json-schema.org/schema#",
-	"$id": "https://pareidolia.es/schemas/parayer/0.0/act-grp.schema.json" 
+	"$id": "https://pareidolia.es/schemas/parayer/0.0/act-grp.schema.json",
+	"title": "Db object type ActGrp",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string",
+			"minLength": 1
+		},
+		"descr": {
+			"type": "string"
+		},
+		"actArea": {
+			"type": "string",
+			"pattern": "[a-f0-9]{32}"
+		},
+	 	"usrAdminList": {
+	 		"type": "array",
+	 		"items": {
+	 			"type": "string",
+	 			"pattern": "[a-f0-9]{32}"
+	 		}
+	 	},
+	  	"usrAssignList": {
+	 		"type": "array",
+	 		"items": {
+	 			"type": "string",
+	 			"pattern": "[a-f0-9]{32}"
+	 		}
+	 	}
+	 }
 }
