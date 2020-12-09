@@ -46,3 +46,5 @@ actArea
 10. effort view + helpers (project, note, task, attachment, appointment)
 11. attendance (within calendar view)
 12. Cross references
+13. i18n (https://blog.novanet.no/creating-multilingual-support-using-angularjs/)
+14. Responsive layout
