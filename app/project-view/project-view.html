@@ -62,7 +62,7 @@
 </div>
 <div id="decntnr-cntnr">
 	<div class="detab" id="tab-general-decntnr" style="display:contents;">
-		<form class="properties" ng-controller="projectViewCtrl" ng-submit="save();">	
+		<form class="properties" ng-submit="save();">	
 			<div class="deform">
 				<label class="mdc-text-field mdc-text-field--filled" id="name">
 					<span class="mdc-text-field__ripple"></span>
@@ -90,7 +90,7 @@
 					<span class="mdc-text-field__ripple"></span>
 					<span class="mdc-floating-label" id="date-start-label">Start date</span>
 					<input class="mdc-text-field__input" id="date-start" type="date" ng-model="project.dateStart" aria-labelledby="date-start-label" 
-						tabindex="106" onblur="console.log(this.value);">
+						tabindex="106">
 					<span class="mdc-line-ripple"></span>
 				</label>&nbsp;<label class="mdc-text-field mdc-text-field--filled" id="date-end">
 					<span class="mdc-text-field__ripple"></span>
@@ -126,7 +126,29 @@
 		</form>		
 	</div>
 	
-	<div class="detab" id="tab-notes-decntnr">[Notes]</div>
+	<div class="detab" id="tab-notes-decntnr">
+		<p>
+			Found {{projectNotes.length}} notes&nbsp;
+			<button class="mdc-button mdc-button--outlined" title="Add new note" ng-click="newNote();">
+				<span class="mdc-button__label">New note</span>
+			</button>
+		</p>
+		<div class="mdc-card note-cntnr" ng-repeat="note in projectNotes" id="project-note-{{note.id}}">
+  			<div class="mdc-card__primary-action">
+				<input id="project-note-{{note.id}}-summary" class="note-summary" value="{{note.summary}}"
+					ng-model="note.summary" ng-change="trackNoteChange(this);" ng-blur="updateNotes(this);"/>
+				<br>
+				<textarea id="project-note-{{note.id}}-descr" class="note-descr"					
+					ng-model="note.descr" ng-change="trackNoteChange(this);" ng-blur="updateNotes(this);">
+					{{note.descr}}
+				</textarea>	
+  			</div>
+    		<div class="mdc-card__action-icons">
+    			<span class="note-meta">["{{note.usr}}"] (TODO) ({{note.date}})</span>
+      			<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete">delete</button>
+			</div>
+		</div>
+	</div>
 	
 	<div class="detab" id="tab-tasks-decntnr">[Tasks]</div>
 	

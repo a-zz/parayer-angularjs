@@ -32,6 +32,28 @@ div.detab {
 	display: none;
 }
 
+/* *** Global scope objects ************************************************* */
+div.note-cntnr {
+	margin: 1em;
+	padding: 0.5em;	
+}
+
+input.note-summary {
+	font-size: 120%;
+	font-weight: bold;
+	border: none;
+}
+
+textarea.note-descr {
+	font-family: sans;
+	border: none;
+}
+
+span.note-meta {
+	font-size: 90%;
+	font-style: italic;
+}
+
 /* *** FX & animations *** ************************************************** */
 .blinking {
     animation:blinkingText 1.2s infinite;

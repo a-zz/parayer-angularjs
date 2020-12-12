@@ -93,24 +93,6 @@ angular.module('parayer.actGridView', ['ngRoute'])
 }]);
 
 // TODO This should be global
-function sortItemsByField(items, field) {
-	
-	var r = [];
-	for(let i = 0; i<items.length; i++) {
-		var inserted = false;
-		for(let j = 0; j<r.length; j++) {
-			if(eval(`items[${i}].${field}`)<eval(`r[${j}].${field}`)) {
-				r.splice(j, 0, items[i]);
-				inserted = true;
-				break;
-			}
-		}
-		if(!inserted)
-			r.push(items[i]);
-	}
-	return r;
-}
-
 function computeWeek(selectedDate) {
 
 	// TODO These should be global

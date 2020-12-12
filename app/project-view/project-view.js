@@ -9,7 +9,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		controller: 'projectViewCtrl'
 	});
 }])
-.controller('projectViewCtrl', ['$routeParams', '$scope', '$http', function($routeParams, $scope, $http) {
+.controller('projectViewCtrl', ['$routeParams', '$scope', '$http', '$filter', function($routeParams, $scope, $http, $filter) {
 		
 	// UI setup
 	// TODO Check tabindex-based navigation (may be faulty because of tabs)
@@ -33,20 +33,37 @@ angular.module('parayer.projectView', ['ngRoute'])
 	$scope.tabs.push(new mdc.tab.MDCTab(document.querySelector('.mdc-tab#tab-files')));
 	$scope.tabs.push(new mdc.tab.MDCTab(document.querySelector('.mdc-tab#tab-appointments')));
 	$scope.tabs.push(new mdc.tab.MDCTab(document.querySelector('.mdc-tab#tab-history')));
+	
 	for(let i = 0; i<$scope.tabs.length; i++)
 		$scope.tabs[i].listen('MDCTab:interacted', function(e) {
+			ui.showWait(true);
 			$scope.showTab(e.detail.tabId);
 			$scope.loadTabContent(e.detail.tabId);
 		});
-
+	
 	// Scope initialization
 	var _usrId_ = '3602049025343d92386f90135b000f1e'; // TODO This should be global (or cookie-set?)
-	$scope.objDataUrl = `/_data/${$routeParams.projectId}`;
 	$scope.loadTabContent = function(tabId) {
 		switch(tabId) {
 		case 'tab-notes':
-			console.log('TODO To be implemented');
-			ui.showWait(false);
+			$scope.objDataUrl = `/_data/_design/global-scope/_view/notes-attached-to?key="${$routeParams.projectId}"`;
+			$http.get($scope.objDataUrl).then(function(respNotes) {
+				// TODO To be moved to /app.js
+				$scope.projectNotes = [];
+				let projectNotesFromDb = [];
+				// TODO Short notes by date desc (or user-specified)
+				for(let i = 0; i<respNotes.data.rows.length; i++) {
+					projectNotesFromDb.push({
+						"id": respNotes.data.rows[i].id, 
+						"summary": respNotes.data.rows[i].value.summary, 
+						"descr": respNotes.data.rows[i].value.descr, 
+						"usr": respNotes.data.rows[i].value.usr, 
+						"date": respNotes.data.rows[i].value.date
+					});
+				}
+				$scope.projectNotes = sortItemsByField(projectNotesFromDb, 'date', true); 
+				ui.showWait(false);
+			});
 			break;
 		case 'tab-tasks':
 			console.log('TODO To be implemented');
@@ -65,6 +82,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			ui.showWait(false);
 			break;
 		default:
+			$scope.objDataUrl = `/_data/${$routeParams.projectId}`;
 			$http.get($scope.objDataUrl).then(function(respProject) {
 				$scope.project = {};
 				for(const key in respProject.data) {
@@ -87,6 +105,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					else
 						$scope.project[key] = respProject.data[key];
 				}
+				ui.setLocation(`Project :: ${$scope.project.name}`);
 				ui.showWait(false);
 			});
 		}
@@ -109,4 +128,39 @@ angular.module('parayer.projectView', ['ngRoute'])
 			}
 		}
 	};
+	
+	// TODO As global, note handling should be moved elsewhere	
+	$scope.noteChanges = [];
+	$scope.trackNoteChange = function(src) {
+		
+		if($scope.noteChanges.indexOf(src.note.id)==-1)
+			$scope.noteChanges.push(src.note.id);
+	}	
+	
+	$scope.updateNotes = function(src) {
+				
+		for(let i = 0; i<$scope.noteChanges.length; i++) {	
+			if($scope.noteChanges[i]==src.note.id) {
+				let dbObjUrl = `/_data/${src.note.id}`; 
+				$http.get(dbObjUrl).then(function(qryResp) {					
+					var note = qryResp.data;
+					note.summary = src.note.summary;
+					note.descr = src.note.descr;
+					note.usr = _usrId_;
+					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');	
+					$http.put(dbObjUrl, JSON.stringify(note)).then(function(updResp) {
+						// TODO Check resp, warn of failures
+						$scope.noteChanges.splice(i, 1);
+						$scope.loadTabContent('tab-notes');
+					});					
+				});				
+				break;
+			}
+		}
+	}	
+	
+	$scope.newNote = function() {
+		
+		console.log('To be implemented');
+	}
 }]);

@@ -281,7 +281,10 @@ function dbSchemaValidation(couchDbQueryString, data) {
 		break;
 	case 'Project':
 		schemaFile += 'project';
-		break;			
+		break;
+	case 'Note':
+		schemaFile += 'note';
+		break;		
 	case 'Usr':
 		schemaFile += 'usr';
 		break;			

@@ -31,3 +31,24 @@ config(['$locationProvider', '$routeProvider', function($locationProvider, $rout
 		window.document.getElementById('top-app-bar-nav-locator').innerHTML = location;
 	};		
 }]);
+
+// Global-scope and utility functions
+// TODO Some kind of namespacing would be nice
+function sortItemsByField(items, field, desc) {
+	
+	var r = [];
+	for(let i = 0; i<items.length; i++) {
+		var inserted = false;
+		for(let j = 0; j<r.length; j++) {
+			if((!desc && eval(`items[${i}].${field}`)<eval(`r[${j}].${field}`)) 
+				|| (desc && eval(`items[${i}].${field}`)>eval(`r[${j}].${field}`))) {
+				r.splice(j, 0, items[i]);
+				inserted = true;
+				break;
+			}
+		}
+		if(!inserted)
+			r.push(items[i]);
+	}
+	return r;
+}
