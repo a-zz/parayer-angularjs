@@ -35,7 +35,7 @@ config(['$locationProvider', '$routeProvider', function($locationProvider, $rout
 		
 		switch(type) {
 		case 'warn':
-			document.querySelector('.mdc-snackbar__label').style = 'color: yellow; font-weight: bold;';
+			document.querySelector('.mdc-snackbar__label').style = 'color: yellow;';
 			break;
 		case 'error':
 			document.querySelector('.mdc-snackbar__label').style = 'color: red; font-weight: bold;';

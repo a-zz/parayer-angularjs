@@ -35,18 +35,21 @@ div.detab {
 /* *** Global scope objects ************************************************* */
 div.note-cntnr {
 	margin: 1em;
-	padding: 0.5em;	
+	padding: 0.5em;
+	background: lightyellow;	
 }
 
 input.note-summary {
 	font-size: 120%;
 	font-weight: bold;
 	border: none;
+	background: transparent;
 }
 
 textarea.note-descr {
 	font-family: sans;
 	border: none;
+	background: transparent;
 }
 
 span.note-meta {
