@@ -34,9 +34,9 @@ actArea
 * Attendance: start & end, day balance (matched w/ effort entries), leaves (matched w/ capped project)
    
 -- Work plan --
-1. actArea < actGrp < project tree view
-2. project view [General+History Tasks Notes Appointments Attachments]
-3. project < note tab
+*1. actArea < actGrp < project tree view
+*2. project view [General+History Tasks Notes Appointments Attachments]
+*3. project < note tab
 4. project < task tab
 5. project < history 
 6. project < attachemnt
