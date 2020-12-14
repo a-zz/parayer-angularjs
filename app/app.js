@@ -1,7 +1,9 @@
 'use strict';
 
 // Global objects
-var ui = {};
+var parayer = {};	// Global namespace
+
+var ui = {}; // TODO Maybe should be parayer.ui (and moved to file bottom)...?
 
 // Declare app level module which depends on views, and core components
 angular.module('parayer', [
@@ -49,7 +51,17 @@ config(['$locationProvider', '$routeProvider', function($locationProvider, $rout
 }]);
 
 // Global-scope and utility functions
-var parayer = {};	// Global namespace
+parayer.auth = {};	// User-authentication and session handling
+(function(context) {
+
+	// FIXME Method contrat missing
+	context.getUsrId = function() {
+		
+		// TODO Test code
+		return '36020490-2534-3d92-386f-90135b000f1e';
+	}
+
+})(parayer.auth);
 
 parayer.util = {};	// General utility sub-namespace
 (function(context) { 

@@ -20,7 +20,6 @@ angular.module('parayer.actAreaView', ['ngRoute'])
 	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#cancel'));
 
 	// Scope initialization
-	var _usrId_ = '36020490-2534-3d92-386f-90135b000f1e'; // TODO This should be global (or cookie-set?)
 	$scope.objDataUrl = `/_data/${$routeParams.actAreaId}`; 
 	$http.get($scope.objDataUrl).then(function(respActArea) {
 		$scope.actArea = respActArea.data;

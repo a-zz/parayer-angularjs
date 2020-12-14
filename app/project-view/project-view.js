@@ -12,8 +12,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 .controller('projectViewCtrl', ['$routeParams', '$scope', '$http', '$filter', function($routeParams, $scope, $http, $filter) {
 		
 	// UI setup
-	// TODO Check tabindex-based navigation (may be faulty because of tabs)
-	// TODO Add input fields validation (see: https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples)
+	// TODO Check tabindex-based navigation (may be faulty because of tabs)	
 	ui.setLocation('Project');
 	ui.showWait(true);
 	$scope.tabs = [];		
@@ -42,7 +41,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 		});
 	
 	// Scope initialization
-	var _usrId_ = '36020490-2534-3d92-386f-90135b000f1e'; // TODO This should be global (or cookie-set?)
 	$scope.loadTabContent = function(tabId) {
 		switch(tabId) {
 		case 'tab-notes':
@@ -51,7 +49,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 				// TODO To be moved to /app.js
 				$scope.projectNotes = [];
 				let projectNotesFromDb = [];
-				// TODO Short notes by date desc (or user-specified)
 				for(let i = 0; i<respNotes.data.rows.length; i++) {
 					projectNotesFromDb.push({
 						"id": respNotes.data.rows[i].id, 
@@ -82,6 +79,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			ui.showWait(false);
 			break;
 		default:
+			// TODO Add input fields validation (see: https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples)
 			$scope.objDataUrl = `/_data/${$routeParams.projectId}`;
 			$http.get($scope.objDataUrl).then(function(respProject) {
 				$scope.project = {};
@@ -147,8 +145,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 					var note = qryResp.data;
 					note.summary = src.note.summary;
 					note.descr = src.note.descr;
-					note.usr = _usrId_;
-					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');	
+					note.usr = parayer.auth.getUsrId();
+					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');
+					// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples	
 					if(note.summary.trim()=='') {
 						ui.showSnackbar('A note summary is required!', 'warn');
 						$scope.noteChanges.splice(i, 1);
@@ -184,7 +183,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			note.type = 'Note';
 			note.summary = 'New note';
 			note.descr = '';
-			note.usr = _usrId_;
+			note.usr = parayer.auth.getUsrId();
 			note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');
 			note.attachedTo = $scope.project._id;
 			let dbObjUrl = `/_data/${uuid}`;	

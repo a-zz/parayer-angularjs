@@ -16,7 +16,6 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	ui.setLocation('Activity grid');
 		
 	// Scope initialization	
-	var _usrId_ = '36020490-2534-3d92-386f-90135b000f1e'; // TODO This should be global (or cookie-set?)
 	$scope.selectedDate = new Date();
 	$scope.selectedWeek = parayer.date.computeWeek($scope.selectedDate); 	
 	$scope.myActList = [];	
@@ -25,12 +24,13 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	$scope.projects = [];
 	$scope.loadFromDb = function() {
 		
+		let usrId = parayer.auth.getUsrId();
 		$http.get(`/_data/_design/activity/_view/activity-area-by-assign-usr` +
-			`?key="${_usrId_}"`).then(function(respActAreas) {
+			`?key="${usrId}"`).then(function(respActAreas) {
 			$http.get(`/_data/_design/activity/_view/activity-group-by-assign-usr` +
-				`?key="${_usrId_}"`).then(function(respActGroups) {
+				`?key="${usrId}"`).then(function(respActGroups) {
 				$http.get(`/_data/_design/activity/_view/project-by-assign-usr` +
-				`?key="${_usrId_}"`).then(function(respActProjects) {
+				`?key="${usrId}"`).then(function(respActProjects) {
 					let areas = parayer.util.sortItemsByField(respActAreas.data.rows, 'value.name');
 					for(let iArea = 0; iArea<areas.length; iArea++) {
 						$scope.myActList.push(areas[iArea]);
