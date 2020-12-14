@@ -6,7 +6,7 @@
 	"properties": {
 		"_id": {
 			"type": "string",
-			"pattern": "[a-f0-9]{32}"
+			"pattern": "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
 		},
 		"_rev": {
 			"type": "string",
@@ -21,20 +21,20 @@
 		},
 		"actArea": {
 			"type": "string",
-			"pattern": "[a-f0-9]{32}"
+			"pattern": "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
 		},
 	 	"usrAdminList": {
 	 		"type": "array",
 	 		"items": {
 	 			"type": "string",
-	 			"pattern": "[a-f0-9]{32}"
+	 			"pattern": "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
 	 		}
 	 	},
 	  	"usrAssignList": {
 	 		"type": "array",
 	 		"items": {
 	 			"type": "string",
-	 			"pattern": "[a-f0-9]{32}"
+	 			"pattern": "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
 	 		}
 	 	}
 	 }

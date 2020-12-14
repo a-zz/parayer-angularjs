@@ -42,7 +42,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		});
 	
 	// Scope initialization
-	var _usrId_ = '3602049025343d92386f90135b000f1e'; // TODO This should be global (or cookie-set?)
+	var _usrId_ = '36020490-2534-3d92-386f-90135b000f1e'; // TODO This should be global (or cookie-set?)
 	$scope.loadTabContent = function(tabId) {
 		switch(tabId) {
 		case 'tab-notes':
@@ -138,7 +138,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	}	
 	
 	$scope.updateNotes = function(src) {
-				
+		
 		for(let i = 0; i<$scope.noteChanges.length; i++) {	
 			if($scope.noteChanges[i]==src.note.id) {
 				let dbObjUrl = `/_data/${src.note.id}`; 
@@ -148,10 +148,21 @@ angular.module('parayer.projectView', ['ngRoute'])
 					note.descr = src.note.descr;
 					note.usr = _usrId_;
 					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');	
-					$http.put(dbObjUrl, JSON.stringify(note)).then(function(updResp) {
+					$http.put(dbObjUrl, JSON.stringify(note)).then(function(putResp) {
 						// TODO Check resp, warn of failures
-						$scope.noteChanges.splice(i, 1);
-						$scope.loadTabContent('tab-notes');
+						if(putResp.status==200) {
+							if(putResp.statusText=='OK') {
+								$scope.noteChanges.splice(i, 1);
+								for(let j = 0; j<$scope.projectNotes.length; j++)
+									if($scope.projectNotes[j].id==src.note.id)
+										$scope.projectNotes[j] = note;
+								$scope.projectNotes = sortItemsByField($scope.projectNotes, 'date', true);
+							}
+							else
+								console.log('TODO statusText!="Ok" -> warn user!');
+						}
+						else
+							console.log('TODO status!=200 -> warn user!');
 					});					
 				});				
 				break;
@@ -161,6 +172,58 @@ angular.module('parayer.projectView', ['ngRoute'])
 	
 	$scope.newNote = function() {
 		
-		console.log('To be implemented');
+		$http.get('/_uuid').then(function(respUuid) {
+			let uuid = respUuid.data.uuid;
+			let note = {};
+			note.id = uuid;
+			note.type = 'Note';
+			note.summary = 'New note';
+			note.descr = '';
+			note.usr = _usrId_;
+			note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');
+			note.attachedTo = $scope.project._id;
+			let dbObjUrl = `/_data/${uuid}`;	
+			$http.put(dbObjUrl, JSON.stringify(note)).then(function(putResp) {
+				// TODO Check resp, warn of failures
+				if(putResp.status==200) {
+					if(putResp.statusText=='OK') {
+						$scope.projectNotes.unshift(note);
+						// TODO Focus to new note's summary input
+					}
+					else
+						console.log('TODO statusText!="Ok" -> warn user!');
+				}
+				else
+					console.log('TODO status!=200 -> warn user!');
+					
+			});
+		});	
+	}
+	
+	$scope.deleteNote = function(src) {
+		
+		// TODO Confirmation dialog before deleting!
+		let dbObjUrl = `/_data/${src.note.id}`;
+		$http.get(dbObjUrl).then(function(qryResp) {					
+			var note = qryResp.data;
+			$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
+				// TODO Check resp, warn of failures
+				if(delResp.status==200) {
+					if(delResp.statusText=='OK') {
+						for(let j = 0; j<$scope.projectNotes.length; j++)
+							if($scope.projectNotes[j].id==src.note.id) {
+								$scope.projectNotes.splice(j, 1);
+								break;
+							}
+						$scope.projectNotes = sortItemsByField($scope.projectNotes, 'date', true);
+					}
+					else
+						console.log('TODO statusText!="Ok" -> warn user!');
+				}
+				else
+					console.log('TODO status!=200 -> warn user!');
+			});					
+		});				
+
 	}
 }]);

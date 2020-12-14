@@ -145,7 +145,9 @@
   			</div>
     		<div class="mdc-card__action-icons">
     			<span class="note-meta">["{{note.usr}}"] (TODO) ({{note.date}})</span>
-      			<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete">delete</button>
+      			<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete" ng-click="deleteNote(this);">
+      				delete
+      			</button>
 			</div>
 		</div>
 	</div>

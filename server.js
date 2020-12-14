@@ -14,6 +14,7 @@ const	__ajv__		= require('ajv');		// JSON schema validator
 const 	__express__	= require('express');	// HTTP server
 const 	__http__ 	= require('http');		// HTTP client, asynchronous
 const 	__retus__ 	= require("retus");		// HTTP client, synchronous
+const { v4: uuid } 	= require('uuid');		// UUID generator (for db-stored objects)
 
 const 	_appVer_ 	= require('./package.json').version;
 var 	_config_ 	= require('./server-config.json');
@@ -44,7 +45,8 @@ else {
 		
 		// TODO Data access permission check required
 		
-		let couchdbQueryString = req.url.substring(dbRequestPrefix.length); 
+		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
+		_log_.info(`db GET request to ${couchdbQueryString}`); 
 		let httpOptions = {
 	    	host: _config_.couchDb.host,
 	    	port: _config_.couchDb.port,
@@ -61,7 +63,6 @@ else {
 			httpResp.on('data', function(chunk) {
 				httpRespData += chunk;
 			});
-			_log_.info(`db GET request to ${couchdbQueryString}`);
 		    httpResp.on('end', function() {
 				// TODO Parse httpRespData for error messages, log accordingly
 				_log_.trace('db returned '+ httpRespData);
@@ -84,7 +85,8 @@ else {
 	
 	_server_.put(dbRequestPrefix + '/*', function(req, res) {
 		
-		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);		
+		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
+		_log_.info(`db PUT request to ${couchdbQueryString}`);		
 		let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
 	        return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
 	    });
@@ -125,6 +127,47 @@ else {
 		});
 		httpReq.write(putData);
 	    httpReq.end();
+	});
+	
+	_server_.delete(dbRequestPrefix + '/*', function(req, res) {
+		
+		// TODO Data access permission check required
+		
+		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
+		_log_.info(`db DELETE request to ${couchdbQueryString}`); 
+		let httpOptions = {
+	    	host: _config_.couchDb.host,
+	    	port: _config_.couchDb.port,
+	    	path: '/' + _config_.couchDb.db + couchdbQueryString,
+	    	method: 'DELETE',
+			headers: {
+				'authorization': _config_.couchDb.authHeader
+			}
+	  	};
+		let httpReq = __http__.request(httpOptions, function(httpResp) {
+			
+			let httpRespData = '';
+	    	httpResp.setEncoding('utf8');
+			httpResp.on('data', function(chunk) {
+				httpRespData += chunk;
+			});
+		    httpResp.on('end', function() {
+				// TODO Parse httpRespData for error messages, log accordingly
+				_log_.trace('db returned '+ httpRespData);
+				res.send(httpRespData);
+	    	})
+	  	}).on("error", function(err) {
+	  		_log_.error(`db DELETE request ${couchdbQueryString}: ${err.message}`);
+		});
+	    httpReq.end();
+	});	
+	
+	/* UUID generation service */
+	_server_.get('/_uuid', function(req, res) {
+	
+		res.send({"uuid": uuid()});
+		// TO be implemented (npm -> uuid)
+		// TODO Should we check db-uniqueness?
 	});
 	
 	/* Test service */ 
@@ -233,7 +276,7 @@ function initDbConnection() {
 		var parayerDBVersionUrl = _config_.parayerDbUrl + '/_design/core/_view/appVersion';  
 		try { 
 			let { body } = __retus__(parayerDBVersionUrl, {
-				'method':'get', 
+				'method': 'get', 
 				'responseType': 'json',
 				headers: {
 					'authorization': _config_.couchDb.authHeader

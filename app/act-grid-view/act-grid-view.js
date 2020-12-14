@@ -16,7 +16,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	ui.setLocation('Activity grid');
 		
 	// Scope initialization	
-	var _usrId_ = '3602049025343d92386f90135b000f1e'; // TODO This should be global (or cookie-set?)
+	var _usrId_ = '36020490-2534-3d92-386f-90135b000f1e'; // TODO This should be global (or cookie-set?)
 	$scope.selectedDate = new Date();
 	$scope.selectedWeek = computeWeek($scope.selectedDate); 	
 	$scope.myActList = [];	
