@@ -61,7 +61,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						"date": respNotes.data.rows[i].value.date
 					});
 				}
-				$scope.projectNotes = sortItemsByField(projectNotesFromDb, 'date', true); 
+				$scope.projectNotes = parayer.util.sortItemsByField(projectNotesFromDb, 'date', true); 
 				ui.showWait(false);
 			});
 			break;
@@ -130,6 +130,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	};
 	
 	// TODO As global, note handling should be moved elsewhere	
+	// TODO User-selectable colours for notes would be fine!
 	$scope.noteChanges = [];
 	$scope.trackNoteChange = function(src) {
 		
@@ -160,7 +161,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								for(let j = 0; j<$scope.projectNotes.length; j++)
 									if($scope.projectNotes[j].id==src.note.id)
 										$scope.projectNotes[j] = note;
-								$scope.projectNotes = sortItemsByField($scope.projectNotes, 'date', true);
+								$scope.projectNotes = parayer.util.sortItemsByField($scope.projectNotes, 'date', true);
 							}
 							else
 								ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
@@ -217,7 +218,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								$scope.projectNotes.splice(j, 1);
 								break;
 							}
-						$scope.projectNotes = sortItemsByField($scope.projectNotes, 'date', true);
+						$scope.projectNotes = parayer.util.sortItemsByField($scope.projectNotes, 'date', true);
 						ui.showSnackbar('Note deleted!	', 'info');
 					}
 					else

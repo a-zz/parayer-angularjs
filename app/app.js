@@ -49,22 +49,47 @@ config(['$locationProvider', '$routeProvider', function($locationProvider, $rout
 }]);
 
 // Global-scope and utility functions
-// TODO Some kind of namespacing would be nice
-function sortItemsByField(items, field, desc) {
+var parayer = {};	// Global namespace
+
+parayer.util = {};	// General utility sub-namespace
+(function(context) { 
+
+	// FIXME Method contrat missing
+	context.sortItemsByField = function(items, field, desc) {
 	
-	var r = [];
-	for(let i = 0; i<items.length; i++) {
-		var inserted = false;
-		for(let j = 0; j<r.length; j++) {
-			if((!desc && eval(`items[${i}].${field}`)<eval(`r[${j}].${field}`)) 
-				|| (desc && eval(`items[${i}].${field}`)>eval(`r[${j}].${field}`))) {
-				r.splice(j, 0, items[i]);
-				inserted = true;
-				break;
+		var r = [];
+		for(let i = 0; i<items.length; i++) {
+			var inserted = false;
+			for(let j = 0; j<r.length; j++) {
+				if((!desc && eval(`items[${i}].${field}`)<eval(`r[${j}].${field}`)) 
+					|| (desc && eval(`items[${i}].${field}`)>eval(`r[${j}].${field}`))) {
+					r.splice(j, 0, items[i]);
+					inserted = true;
+					break;
+				}
 			}
+			if(!inserted)
+				r.push(items[i]);
 		}
-		if(!inserted)
-			r.push(items[i]);
+		return r;
 	}
-	return r;
-}
+})(parayer.util);
+
+parayer.date = {};	// Date-handling utilities namespace
+(function (context) {
+	
+	let weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+	let months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dec'];
+
+	// FIXME Method contrat missing
+	context.computeWeek = function(selectedDate) {
+
+		let week = [];
+		for(let d = 1 - selectedDate.getDay(); d<=7-selectedDate.getDay(); d++) {
+			let date = new Date(selectedDate);
+			date.setDate(date.getDate() + d);		
+			week.push({'dt': weekDays[date.getDay()], 'dm': date.getDate(), 'mn': date.getMonth()+1, 'mt': months[date.getMonth()], 'today': (d==0)});
+		}	
+		return week;
+	}
+})(parayer.date);

@@ -18,7 +18,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	// Scope initialization	
 	var _usrId_ = '36020490-2534-3d92-386f-90135b000f1e'; // TODO This should be global (or cookie-set?)
 	$scope.selectedDate = new Date();
-	$scope.selectedWeek = computeWeek($scope.selectedDate); 	
+	$scope.selectedWeek = parayer.date.computeWeek($scope.selectedDate); 	
 	$scope.myActList = [];	
 	$scope.areas = [];
 	$scope.groups = [];
@@ -31,7 +31,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 				`?key="${_usrId_}"`).then(function(respActGroups) {
 				$http.get(`/_data/_design/activity/_view/project-by-assign-usr` +
 				`?key="${_usrId_}"`).then(function(respActProjects) {
-					let areas = sortItemsByField(respActAreas.data.rows, 'value.name');
+					let areas = parayer.util.sortItemsByField(respActAreas.data.rows, 'value.name');
 					for(let iArea = 0; iArea<areas.length; iArea++) {
 						$scope.myActList.push(areas[iArea]);
 						$scope.areas.push(areas[iArea]);
@@ -40,7 +40,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 							if(respActGroups.data.rows[iGroup].value.actArea==areas[iArea].id)
 								groups.push(respActGroups.data.rows[iGroup]);
 						}
-						groups = sortItemsByField(groups, 'value.name');
+						groups = parayer.util.sortItemsByField(groups, 'value.name');
 						for(let iGroup = 0; iGroup<groups.length; iGroup++) { 
 							$scope.myActList.push(groups[iGroup]);
 							$scope.groups.push(groups[iGroup]);
@@ -49,7 +49,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 								if(respActProjects.data.rows[iProject].value.actGrp==groups[iGroup].id)
 									projects.push(respActProjects.data.rows[iProject]);
 							}
-							projects = sortItemsByField(projects, 'value.name');
+							projects = parayer.util.sortItemsByField(projects, 'value.name');
 							for(let iProject = 0; iProject<projects.length; iProject++) { 
 								$scope.myActList.push(projects[iProject]);
 								$scope.projects.push(projects[iProject]);								
@@ -88,22 +88,6 @@ angular.module('parayer.actGridView', ['ngRoute'])
 				break;
 			}
 		}
-		// TODO View reload might be needed for sorting 
+		// TODO Activity grid might need to be re-sorted after tree update 
 	}
 }]);
-
-// TODO This should be global
-function computeWeek(selectedDate) {
-
-	// TODO These should be global
-	let weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-	let months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dec'];
-	
-	let week = [];
-	for(let d = 1 - selectedDate.getDay(); d<=7-selectedDate.getDay(); d++) {
-		let date = new Date(selectedDate);
-		date.setDate(date.getDate() + d);		
-		week.push({'dt': weekDays[date.getDay()], 'dm': date.getDate(), 'mn': date.getMonth()+1, 'mt': months[date.getMonth()], 'today': (d==0)});
-	}	
-	return week;
-}
