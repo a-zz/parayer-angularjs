@@ -12,8 +12,8 @@ angular.module('parayer.actGridView', ['ngRoute'])
 .controller('actGridViewCtrl', ['$scope', '$http', function($scope, $http) {
 
 	// UI setup
-	ui.showWait(true);
-	ui.setLocation('Activity grid');
+	parayer.ui.showWait(true);
+	parayer.ui.setLocation('Activity grid');
 		
 	// Scope initialization	
 	$scope.selectedDate = new Date();
@@ -57,7 +57,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 						}
 					}
 					window.document.getElementById('act-grid').style.visibility = 'visible';
-					ui.showWait(false);
+					parayer.ui.showWait(false);
 				});		
 			});
 		});

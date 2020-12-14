@@ -13,7 +13,7 @@ angular.module('parayer.actAreaView', ['ngRoute'])
 
 	// UI setup	
 	// TODO Add input fields validation (see: https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples)
-	ui.setLocation('Activity area');
+	parayer.ui.setLocation('Activity area');
 	new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field#name'));
 	new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field#descr'));
 	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#submit'));
@@ -23,7 +23,7 @@ angular.module('parayer.actAreaView', ['ngRoute'])
 	$scope.objDataUrl = `/_data/${$routeParams.actAreaId}`; 
 	$http.get($scope.objDataUrl).then(function(respActArea) {
 		$scope.actArea = respActArea.data;
-		ui.showWait(false);
+		parayer.ui.showWait(false);
 	});
 	
 	// Event handlers
@@ -31,7 +31,7 @@ angular.module('parayer.actAreaView', ['ngRoute'])
 		// TODO Form validation
 		$http.put($scope.objDataUrl, JSON.stringify($scope.actArea)).then(function(putResp) {
 			if(putResp.status!=200 || putResp.statusText!='OK')
-				ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+				parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			window.location.href = '#!/act-grid';
 		});
 	}

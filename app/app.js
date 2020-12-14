@@ -3,8 +3,6 @@
 // Global objects
 var parayer = {};	// Global namespace
 
-var ui = {}; // TODO Maybe should be parayer.ui (and moved to file bottom)...?
-
 // Declare app level module which depends on views, and core components
 angular.module('parayer', [
 	'ngRoute',
@@ -18,36 +16,8 @@ config(['$locationProvider', '$routeProvider', function($locationProvider, $rout
 	
 	$locationProvider.hashPrefix('!');
 	$routeProvider.otherwise({redirectTo: '/act-grid'});
-		
-	ui.topAppBar = new mdc.topAppBar.MDCTopAppBar(document.querySelector('.mdc-top-app-bar'));	
-	ui.topAppBar.setScrollTarget(document.getElementById('main-content'));
-	ui.drawer = mdc.drawer.MDCDrawer.attachTo(document.querySelector('.mdc-drawer'));
-	ui.snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));
-	
-	ui.topAppBar.listen('MDCTopAppBar:nav', function() {
-		ui.drawer.open = !ui.drawer.open;
-	});
-	ui.showWait = function(show) {
-		window.document.getElementById('wait-icon').style.visibility=show?'visible':'hidden';
-	};
-	ui.setLocation = function(location) {
-		window.document.getElementById('top-app-bar-nav-locator').innerHTML = location;
-	};		
-	ui.showSnackbar = function(txt, type) {
-		
-		switch(type) {
-		case 'warn':
-			document.querySelector('.mdc-snackbar__label').style = 'color: yellow;';
-			break;
-		case 'error':
-			document.querySelector('.mdc-snackbar__label').style = 'color: red; font-weight: bold;';
-			break;
-		default:
-			document.querySelector('.mdc-snackbar__label').style = '';
-		}
-		ui.snackbar.labelText = txt;
-		ui.snackbar.open();
-	}
+
+	parayer.ui.init();		
 }]);
 
 // Global-scope and utility functions
@@ -62,6 +32,53 @@ parayer.auth = {};	// User-authentication and session handling
 	}
 
 })(parayer.auth);
+
+parayer.ui = {};	// UI management
+(function(context) {
+	
+	let topAppBar;	
+	let drawer;
+	let snackbar;
+	
+	// FIXME Method contrat missing
+	context.init = function () {
+		
+		topAppBar = new mdc.topAppBar.MDCTopAppBar(document.querySelector('.mdc-top-app-bar'));	
+		topAppBar.setScrollTarget(document.getElementById('main-content'));
+		topAppBar.listen('MDCTopAppBar:nav', function() {
+			drawer.open = !drawer.open;
+		});
+		drawer = mdc.drawer.MDCDrawer.attachTo(document.querySelector('.mdc-drawer'));
+		snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));		
+	}
+
+	// FIXME Method contrat missing
+	context.showWait = function(show) {
+		window.document.getElementById('wait-icon').style.visibility=show?'visible':'hidden';
+	};
+	
+	// FIXME Method contrat missing
+	context.setLocation = function(location) {
+		window.document.getElementById('top-app-bar-nav-locator').innerHTML = location;
+	};		
+	
+	// FIXME Method contrat missing
+	context.showSnackbar = function(txt, type) {
+		
+		switch(type) {
+		case 'warn':
+			document.querySelector('.mdc-snackbar__label').style = 'color: yellow;';
+			break;
+		case 'error':
+			document.querySelector('.mdc-snackbar__label').style = 'color: red; font-weight: bold;';
+			break;
+		default:
+			document.querySelector('.mdc-snackbar__label').style = '';
+		}
+		snackbar.labelText = txt;
+		snackbar.open();
+	}
+})(parayer.ui);
 
 parayer.util = {};	// General utility sub-namespace
 (function(context) { 

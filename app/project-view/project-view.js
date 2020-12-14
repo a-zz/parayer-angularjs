@@ -13,8 +13,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 		
 	// UI setup
 	// TODO Check tabindex-based navigation (may be faulty because of tabs)	
-	ui.setLocation('Project');
-	ui.showWait(true);
+	parayer.ui.setLocation('Project');
+	parayer.ui.showWait(true);
 	$scope.tabs = [];		
 			
 	$scope.tabs.push(new mdc.tab.MDCTab(document.querySelector('.mdc-tab#tab-general')));
@@ -35,7 +35,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	
 	for(let i = 0; i<$scope.tabs.length; i++)
 		$scope.tabs[i].listen('MDCTab:interacted', function(e) {
-			ui.showWait(true);
+			parayer.ui.showWait(true);
 			$scope.showTab(e.detail.tabId);
 			$scope.loadTabContent(e.detail.tabId);
 		});
@@ -59,24 +59,24 @@ angular.module('parayer.projectView', ['ngRoute'])
 					});
 				}
 				$scope.projectNotes = parayer.util.sortItemsByField(projectNotesFromDb, 'date', true); 
-				ui.showWait(false);
+				parayer.ui.showWait(false);
 			});
 			break;
 		case 'tab-tasks':
 			console.log('TODO To be implemented');
-			ui.showWait(false);
+			parayer.ui.showWait(false);
 			break;
 		case 'tab-files':
 			console.log('TODO To be implemented');
-			ui.showWait(false);
+			parayer.ui.showWait(false);
 			break;
 		case 'tab-appointments':
 			console.log('TODO To be implemented');
-			ui.showWait(false);
+			parayer.ui.showWait(false);
 			break;
 		case 'tab-history':
 			console.log('TODO To be implemented');
-			ui.showWait(false);
+			parayer.ui.showWait(false);
 			break;
 		default:
 			// TODO Add input fields validation (see: https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples)
@@ -103,18 +103,18 @@ angular.module('parayer.projectView', ['ngRoute'])
 					else
 						$scope.project[key] = respProject.data[key];
 				}
-				ui.setLocation(`Project :: ${$scope.project.name}`);
-				ui.showWait(false);
+				parayer.ui.setLocation(`Project :: ${$scope.project.name}`);
+				parayer.ui.showWait(false);
 			});
 		}
 	};
 	$scope.loadTabContent('tab-general');
-	ui.showWait(false);
+	parayer.ui.showWait(false);
 		
 	// Event handlers
 	$scope.showTab = function(tabId) {
 		
-		ui.showWait(true);
+		parayer.ui.showWait(true);
 		for(let i = 0; i<$scope.tabs.length; i++) {
 			if($scope.tabs[i].id==tabId) {
 				$scope.tabs[i].activate();
@@ -149,7 +149,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');
 					// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples	
 					if(note.summary.trim()=='') {
-						ui.showSnackbar('A note summary is required!', 'warn');
+						parayer.ui.showSnackbar('A note summary is required!', 'warn');
 						$scope.noteChanges.splice(i, 1);
 						return;
 					}
@@ -163,10 +163,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 								$scope.projectNotes = parayer.util.sortItemsByField($scope.projectNotes, 'date', true);
 							}
 							else
-								ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+								parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 						}
 						else
-							ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 					});					
 				});				
 				break;
@@ -194,10 +194,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 						// TODO Focus new note's summary input
 					}
 					else
-						ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 				}
 				else
-					ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 					
 			});
 		});	
@@ -218,13 +218,13 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.projectNotes = parayer.util.sortItemsByField($scope.projectNotes, 'date', true);
-						ui.showSnackbar('Note deleted!	', 'info');
+						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
 					else
-						ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 				}
 				else
-					ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			});					
 		});				
 
