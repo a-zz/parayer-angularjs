@@ -135,7 +135,7 @@
 		</p>
 		<div class="mdc-card note-cntnr" ng-repeat="note in projectNotes" id="project-note-{{note.id}}">
   			<div class="mdc-card__primary-action">
-				<input id="project-note-{{note.id}}-summary" class="note-summary" value="{{note.summary}}"
+				<input id="project-note-{{note.id}}-summary" class="note-summary" value="{{note.summary}}" placeholder="Note summary"
 					ng-model="note.summary" ng-change="trackNoteChange(this);" ng-blur="updateNotes(this);"/>
 				<br>
 				<textarea id="project-note-{{note.id}}-descr" class="note-descr"					

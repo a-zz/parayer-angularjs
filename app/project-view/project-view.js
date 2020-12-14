@@ -148,6 +148,11 @@ angular.module('parayer.projectView', ['ngRoute'])
 					note.descr = src.note.descr;
 					note.usr = _usrId_;
 					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');	
+					if(note.summary.trim()=='') {
+						ui.showSnackbar('A note summary is required!', 'warn');
+						$scope.noteChanges.splice(i, 1);
+						return;
+					}
 					$http.put(dbObjUrl, JSON.stringify(note)).then(function(putResp) {
 						if(putResp.status==200) {
 							if(putResp.statusText=='OK') {
