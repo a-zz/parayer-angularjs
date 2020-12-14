@@ -149,7 +149,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 					note.usr = _usrId_;
 					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');	
 					$http.put(dbObjUrl, JSON.stringify(note)).then(function(putResp) {
-						// TODO Check resp, warn of failures
 						if(putResp.status==200) {
 							if(putResp.statusText=='OK') {
 								$scope.noteChanges.splice(i, 1);
@@ -159,10 +158,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 								$scope.projectNotes = sortItemsByField($scope.projectNotes, 'date', true);
 							}
 							else
-								console.log('TODO statusText!="Ok" -> warn user!');
+								ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 						}
 						else
-							console.log('TODO status!=200 -> warn user!');
+							ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 					});					
 				});				
 				break;
@@ -184,17 +183,16 @@ angular.module('parayer.projectView', ['ngRoute'])
 			note.attachedTo = $scope.project._id;
 			let dbObjUrl = `/_data/${uuid}`;	
 			$http.put(dbObjUrl, JSON.stringify(note)).then(function(putResp) {
-				// TODO Check resp, warn of failures
 				if(putResp.status==200) {
 					if(putResp.statusText=='OK') {
 						$scope.projectNotes.unshift(note);
 						// TODO Focus to new note's summary input
 					}
 					else
-						console.log('TODO statusText!="Ok" -> warn user!');
+						ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 				}
 				else
-					console.log('TODO status!=200 -> warn user!');
+					ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 					
 			});
 		});	
@@ -207,7 +205,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 		$http.get(dbObjUrl).then(function(qryResp) {					
 			var note = qryResp.data;
 			$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
-				// TODO Check resp, warn of failures
 				if(delResp.status==200) {
 					if(delResp.statusText=='OK') {
 						for(let j = 0; j<$scope.projectNotes.length; j++)
@@ -216,12 +213,13 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.projectNotes = sortItemsByField($scope.projectNotes, 'date', true);
+						ui.showSnackbar('Note deleted!	', 'info');
 					}
 					else
-						console.log('TODO statusText!="Ok" -> warn user!');
+						ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 				}
 				else
-					console.log('TODO status!=200 -> warn user!');
+					ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			});					
 		});				
 

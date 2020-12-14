@@ -20,6 +20,7 @@ config(['$locationProvider', '$routeProvider', function($locationProvider, $rout
 	ui.topAppBar = new mdc.topAppBar.MDCTopAppBar(document.querySelector('.mdc-top-app-bar'));	
 	ui.topAppBar.setScrollTarget(document.getElementById('main-content'));
 	ui.drawer = mdc.drawer.MDCDrawer.attachTo(document.querySelector('.mdc-drawer'));
+	ui.snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));
 	
 	ui.topAppBar.listen('MDCTopAppBar:nav', function() {
 		ui.drawer.open = !ui.drawer.open;
@@ -30,6 +31,21 @@ config(['$locationProvider', '$routeProvider', function($locationProvider, $rout
 	ui.setLocation = function(location) {
 		window.document.getElementById('top-app-bar-nav-locator').innerHTML = location;
 	};		
+	ui.showSnackbar = function(txt, type) {
+		
+		switch(type) {
+		case 'warn':
+			document.querySelector('.mdc-snackbar__label').style = 'color: yellow; font-weight: bold;';
+			break;
+		case 'error':
+			document.querySelector('.mdc-snackbar__label').style = 'color: red; font-weight: bold;';
+			break;
+		default:
+			document.querySelector('.mdc-snackbar__label').style = '';
+		}
+		ui.snackbar.labelText = txt;
+		ui.snackbar.open();
+	}
 }]);
 
 // Global-scope and utility functions

@@ -30,8 +30,9 @@ angular.module('parayer.actAreaView', ['ngRoute'])
 	// Event handlers
 	$scope.save = function() {
 		// TODO Form validation
-		$http.put($scope.objDataUrl, JSON.stringify($scope.actArea)).then(function(saveResp) {
-			// TODO Parse response, warn on error
+		$http.put($scope.objDataUrl, JSON.stringify($scope.actArea)).then(function(putResp) {
+			if(putResp.status!=200 || putResp.statusText!='OK')
+				ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			window.location.href = '#!/act-grid';
 		});
 	}
