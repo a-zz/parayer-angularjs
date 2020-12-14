@@ -41,7 +41,7 @@ actArea
 5. project < history 
 6. project < attachemnt
 7. project < appointments
-8. General TODO check; sp.: user check (assign & admin); form validations; data access permissions & validation; .js templates
+8. General TODO check; sp.: user check (assign & admin); form validations; data access permissions & validation; .js templates; test code
 9. calendar view 
 10. effort view + helpers (project, note, task, attachment, appointment)
 11. attendance (within calendar view)
