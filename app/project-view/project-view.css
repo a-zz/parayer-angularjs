@@ -2,6 +2,18 @@
  * parayer :: project view stylesheet                                        *
  * ************************************************************************** */
 
+div.detab-control-cntnr  {
+	 height: 2em;
+}
+
+div.detab-control-cntnr-left  {
+	float: left; 
+}
+
+div.detab-control-cntnr-right  {
+	float: right; 
+}
+
 div#decntnr-cntnr {
 	padding: 0.8em;
 }

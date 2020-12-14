@@ -46,7 +46,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		case 'tab-notes':
 			$scope.objDataUrl = `/_data/_design/global-scope/_view/notes-attached-to?key="${$routeParams.projectId}"`;
 			$http.get($scope.objDataUrl).then(function(respNotes) {
-				// TODO To be moved to /app.js
+				// TODO As global, note handling should be moved elsewhere
 				$scope.projectNotes = [];
 				let projectNotesFromDb = [];
 				for(let i = 0; i<respNotes.data.rows.length; i++) {
@@ -191,7 +191,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 				if(putResp.status==200) {
 					if(putResp.statusText=='OK') {
 						$scope.projectNotes.unshift(note);
-						// TODO Focus to new note's summary input
+						// TODO Focus new note's summary input
 					}
 					else
 						ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
