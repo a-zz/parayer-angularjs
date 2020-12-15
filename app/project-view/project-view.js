@@ -58,7 +58,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						"date": respNotes.data.rows[i].value.date
 					});
 				}
-				$scope.projectNotes = parayer.util.sortItemsByField(projectNotesFromDb, 'date', true); 
+				$scope.projectNotes = _.reverse(_.sortBy(projectNotesFromDb, ['date', 'summary'])); 
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -160,7 +160,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								for(let j = 0; j<$scope.projectNotes.length; j++)
 									if($scope.projectNotes[j].id==src.note.id)
 										$scope.projectNotes[j] = note;
-								$scope.projectNotes = parayer.util.sortItemsByField($scope.projectNotes, 'date', true);
+								$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
 							}
 							else
 								parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
@@ -217,7 +217,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								$scope.projectNotes.splice(j, 1);
 								break;
 							}
-						$scope.projectNotes = parayer.util.sortItemsByField($scope.projectNotes, 'date', true);
+						$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
 						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
 					else

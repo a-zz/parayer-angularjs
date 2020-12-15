@@ -31,7 +31,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 				`?key="${usrId}"`).then(function(respActGroups) {
 				$http.get(`/_data/_design/activity/_view/project-by-assign-usr` +
 				`?key="${usrId}"`).then(function(respActProjects) {
-					let areas = parayer.util.sortItemsByField(respActAreas.data.rows, 'value.name');
+					let areas = _.sortBy(respActAreas.data.rows, ['value.name']); 
 					for(let iArea = 0; iArea<areas.length; iArea++) {
 						$scope.myActList.push(areas[iArea]);
 						$scope.areas.push(areas[iArea]);
@@ -40,7 +40,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 							if(respActGroups.data.rows[iGroup].value.actArea==areas[iArea].id)
 								groups.push(respActGroups.data.rows[iGroup]);
 						}
-						groups = parayer.util.sortItemsByField(groups, 'value.name');
+						groups = _.sortBy(groups, ['value.name']); 
 						for(let iGroup = 0; iGroup<groups.length; iGroup++) { 
 							$scope.myActList.push(groups[iGroup]);
 							$scope.groups.push(groups[iGroup]);
@@ -49,7 +49,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 								if(respActProjects.data.rows[iProject].value.actGrp==groups[iGroup].id)
 									projects.push(respActProjects.data.rows[iProject]);
 							}
-							projects = parayer.util.sortItemsByField(projects, 'value.name');
+							projects = _.sortBy(projects, ['value.name']);
 							for(let iProject = 0; iProject<projects.length; iProject++) { 
 								$scope.myActList.push(projects[iProject]);
 								$scope.projects.push(projects[iProject]);								

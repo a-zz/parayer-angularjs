@@ -102,23 +102,8 @@ parayer.ui = {};	// -- UI management sub-namespace --
 parayer.util = {};	// -- General utility sub-namespace --
 (function(context) { 
 
-	// FIXME Method contract missing
-	context.sortItemsByField = function(items, field, desc) {
+	// (nothing here yet)
+	context.nothingHereYet = function() {
 	
-		var r = [];
-		for(let i = 0; i<items.length; i++) {
-			var inserted = false;
-			for(let j = 0; j<r.length; j++) {
-				if((!desc && eval(`items[${i}].${field}`)<eval(`r[${j}].${field}`)) 
-					|| (desc && eval(`items[${i}].${field}`)>eval(`r[${j}].${field}`))) {
-					r.splice(j, 0, items[i]);
-					inserted = true;
-					break;
-				}
-			}
-			if(!inserted)
-				r.push(items[i]);
-		}
-		return r;
 	}
 })(parayer.util);
