@@ -229,4 +229,16 @@ angular.module('parayer.projectView', ['ngRoute'])
 		});				
 
 	}
+	
+	$scope.filterNotesByText = function(src) {
+		
+		for(let i = 0; i<$scope.projectNotes.length; i++) {
+			let noteCntnr = document.getElementById(`project-note-${$scope.projectNotes[i]._id}`);
+			if($scope.projectNotes[i].summary.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1 || 
+				$scope.projectNotes[i].descr.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1)
+				noteCntnr.style.display = '';
+			else
+				noteCntnr.style.display = 'none';
+		}
+	}
 }]);
