@@ -58,6 +58,7 @@ parayer.ui = {};	// -- UI management sub-namespace --
 	let topAppBar;	
 	let drawer;
 	let snackbar;
+	let simpleConfirmDialog;
 	
 	// FIXME Method contract missing
 	context.init = function () {
@@ -68,7 +69,11 @@ parayer.ui = {};	// -- UI management sub-namespace --
 			drawer.open = !drawer.open;
 		});
 		drawer = mdc.drawer.MDCDrawer.attachTo(document.querySelector('.mdc-drawer'));
-		snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));		
+		snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));
+		simpleConfirmDialog = new mdc.dialog.MDCDialog(document.getElementById('simple-confirm-dialog'));
+		// FIXME setEscapeKeyAction('cancel') and simpleConfirmDialog.setScrimClickAction('cancel') not working?!
+		//simpleConfirmDialog.setEscapeKeyAction('cancel');
+		//simpleConfirmDialog.setScrimClickAction('cancel');
 	}
 
 	// FIXME Method contract missing
@@ -97,6 +102,17 @@ parayer.ui = {};	// -- UI management sub-namespace --
 		snackbar.labelText = txt;
 		snackbar.open();
 	}
+	
+	// FIXME Method contract missing
+	// TODO Make ok action available on Enter key (hint: data-mdc-dialog-button-default) 
+	context.showSimpleConfirmDialog = function(innerHTML, okCallback, cancelCallBack) {
+		
+		document.getElementById('simple-confirm-dialog-content').innerHTML = innerHTML;
+		document.querySelector('div#simple-confirm-dialog-actions button[data-mdc-dialog-action="ok"]').addEventListener('click', okCallback);
+		document.querySelector('div#simple-confirm-dialog-actions button[data-mdc-dialog-action="cancel"]').addEventListener('click', cancelCallBack);		
+		simpleConfirmDialog.open();
+	}
+	
 })(parayer.ui);
 
 parayer.util = {};	// -- General utility sub-namespace --
