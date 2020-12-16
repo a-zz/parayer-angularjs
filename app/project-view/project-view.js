@@ -26,7 +26,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field#effort-cap'));
 	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#submit'));
 	new mdc.ripple.MDCRipple(document.querySelector('.mdc-button#cancel'));
-	
+		
 	$scope.tabs.push(new mdc.tab.MDCTab(document.querySelector('.mdc-tab#tab-notes')));
 	$scope.tabs.push(new mdc.tab.MDCTab(document.querySelector('.mdc-tab#tab-tasks')));
 	$scope.tabs.push(new mdc.tab.MDCTab(document.querySelector('.mdc-tab#tab-files')));
@@ -203,31 +203,36 @@ angular.module('parayer.projectView', ['ngRoute'])
 		});	
 	}
 	
-	$scope.deleteNote = function(src) {
+	$scope.deleteNote = function(src, confirmed) {
 		
-		// TODO Confirmation dialog before deleting!
-		let dbObjUrl = `/_data/${src.note._id}`;
-		$http.get(dbObjUrl).then(function(qryResp) {					
-			var note = qryResp.data;
-			$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
-				if(delResp.status==200) {
-					if(delResp.statusText=='OK') {
-						for(let j = 0; j<$scope.projectNotes.length; j++)
-							if($scope.projectNotes[j]._id==src.note._id) {
-								$scope.projectNotes.splice(j, 1);
-								break;
-							}
-						$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
-						parayer.ui.showSnackbar('Note deleted!	', 'info');
+		if(!confirmed) {			
+			parayer.ui.showSimpleConfirmDialog('Note deletion can\'t be undone, please confirm', 
+				function() { $scope.deleteNote(src, true) }, function() { parayer.ui.showSnackbar('Note deletion cancelled!') });
+			return;
+		}
+		else {
+			let dbObjUrl = `/_data/${src.note._id}`;
+			$http.get(dbObjUrl).then(function(qryResp) {					
+				var note = qryResp.data;
+				$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
+					if(delResp.status==200) {
+						if(delResp.statusText=='OK') {
+							for(let j = 0; j<$scope.projectNotes.length; j++)
+								if($scope.projectNotes[j]._id==src.note._id) {
+									$scope.projectNotes.splice(j, 1);
+									break;
+								}
+							$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
+							parayer.ui.showSnackbar('Note deleted!	', 'info');
+						}
+						else
+							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 					}
 					else
 						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-				}
-				else
-					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-			});					
-		});				
-
+				});					
+			});				
+		}
 	}
 	
 	$scope.filterNotesByText = function(src) {
