@@ -51,7 +51,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 				let projectNotesFromDb = [];
 				for(let i = 0; i<respNotes.data.rows.length; i++) {
 					projectNotesFromDb.push({
-						"id": respNotes.data.rows[i].id, 
+						"_id": respNotes.data.rows[i].id, 
 						"summary": respNotes.data.rows[i].value.summary, 
 						"descr": respNotes.data.rows[i].value.descr, 
 						"usr": respNotes.data.rows[i].value.usr, 
@@ -132,15 +132,15 @@ angular.module('parayer.projectView', ['ngRoute'])
 	$scope.noteChanges = [];
 	$scope.trackNoteChange = function(src) {
 		
-		if($scope.noteChanges.indexOf(src.note.id)==-1)
-			$scope.noteChanges.push(src.note.id);
+		if($scope.noteChanges.indexOf(src.note._id)==-1)
+			$scope.noteChanges.push(src.note._id);
 	}	
 	
 	$scope.updateNotes = function(src) {
 		
 		for(let i = 0; i<$scope.noteChanges.length; i++) {	
-			if($scope.noteChanges[i]==src.note.id) {
-				let dbObjUrl = `/_data/${src.note.id}`; 
+			if($scope.noteChanges[i]==src.note._id) {
+				let dbObjUrl = `/_data/${src.note._id}`; 
 				$http.get(dbObjUrl).then(function(qryResp) {					
 					var note = qryResp.data;
 					note.summary = src.note.summary;
@@ -158,7 +158,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 							if(putResp.statusText=='OK') {
 								$scope.noteChanges.splice(i, 1);
 								for(let j = 0; j<$scope.projectNotes.length; j++)
-									if($scope.projectNotes[j].id==src.note.id)
+									if($scope.projectNotes[j]._id==src.note._id)
 										$scope.projectNotes[j] = note;
 								$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
 							}
@@ -179,7 +179,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		$http.get('/_uuid').then(function(respUuid) {
 			let uuid = respUuid.data.uuid;
 			let note = {};
-			note.id = uuid;
+			note._id = uuid;
 			note.type = 'Note';
 			note.summary = 'New note';
 			note.descr = '';
@@ -206,14 +206,14 @@ angular.module('parayer.projectView', ['ngRoute'])
 	$scope.deleteNote = function(src) {
 		
 		// TODO Confirmation dialog before deleting!
-		let dbObjUrl = `/_data/${src.note.id}`;
+		let dbObjUrl = `/_data/${src.note._id}`;
 		$http.get(dbObjUrl).then(function(qryResp) {					
 			var note = qryResp.data;
 			$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
 				if(delResp.status==200) {
 					if(delResp.statusText=='OK') {
 						for(let j = 0; j<$scope.projectNotes.length; j++)
-							if($scope.projectNotes[j].id==src.note.id) {
+							if($scope.projectNotes[j]._id==src.note._id) {
 								$scope.projectNotes.splice(j, 1);
 								break;
 							}
