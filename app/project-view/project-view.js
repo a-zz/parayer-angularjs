@@ -47,6 +47,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			$scope.objDataUrl = `/_data/_design/global-scope/_view/notes-attached-to?key="${$routeParams.projectId}"`;
 			$http.get($scope.objDataUrl).then(function(respNotes) {
 				// TODO As global, note handling should be moved elsewhere
+				// TODO To be refactored: $scope.projectNotes should rather be $scope.project.notes
 				$scope.projectNotes = [];
 				let projectNotesFromDb = [];
 				for(let i = 0; i<respNotes.data.rows.length; i++) {
@@ -63,8 +64,26 @@ angular.module('parayer.projectView', ['ngRoute'])
 			});
 			break;
 		case 'tab-tasks':
-			console.log('TODO To be implemented');
-			parayer.ui.showWait(false);
+			$scope.objDataUrl = `/_data/_design/project/_view/tasks-by-project?key="${$routeParams.projectId}"`;
+			$http.get($scope.objDataUrl).then(function(getResp) {				
+				$scope.project.tasks = [];
+				let projectTasksFromDb = [];
+				for(let i = 0; i<getResp.data.rows.length; i++) {
+					projectTasksFromDb.push({
+						"_id": getResp.data.rows[i].id, 
+						"summary": getResp.data.rows[i].value.summary, 
+						"descr": getResp.data.rows[i].value.descr, 
+						"pc": getResp.data.rows[i].value.pc, 
+						"dateDue": getResp.data.rows[i].value.dateDue,
+						"created": getResp.data.rows[i].value.created,
+						"updated": getResp.data.rows[i].value.updated,
+						"usrAssignList": getResp.data.rows[i].value.usrAssignList
+					});
+				}
+				// TODO Default sorting for tasks should be: dueDate desc (the sooner, the more urgent), pc asc (less-progressed first); custom sorting func required
+				$scope.project.tasks = _.sortBy(projectTasksFromDb, ['dueDate', 'pc']); 
+				parayer.ui.showWait(false);
+			});
 			break;
 		case 'tab-files':
 			console.log('TODO To be implemented');
@@ -127,6 +146,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		}
 	};
 	
+	// -- Project NOTES management --
 	// TODO As global, note handling should be moved elsewhere	
 	// TODO User-selectable colours for notes would be fine!
 	$scope.noteChanges = [];
@@ -206,7 +226,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	$scope.deleteNote = function(src, confirmed) {
 		
 		if(!confirmed) {			
-			parayer.ui.showSimpleConfirmDialog('Note deletion can\'t be undone, please confirm', 
+			parayer.ui.showSimpleConfirmDialog('Note deletion can\'t be undone, please confirm.', 
 				function() { $scope.deleteNote(src, true) }, function() { parayer.ui.showSnackbar('Note deletion cancelled!') });
 			return;
 		}
@@ -227,33 +247,11 @@ angular.module('parayer.projectView', ['ngRoute'])
 						}
 						else
 							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-		if(!confirmed) {			
-			parayer.ui.showSimpleConfirmDialog('Note deletion can\'t be undone, please confirm', 
-				function() { $scope.deleteNote(src, true) }, function() { parayer.ui.showSnackbar('Note deletion cancelled!') });
-			return;
-		}
-		else {
-			let dbObjUrl = `/_data/${src.note._id}`;
-			$http.get(dbObjUrl).then(function(qryResp) {					
-				var note = qryResp.data;
-				$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
-					if(delResp.status==200) {
-						if(delResp.statusText=='OK') {
-							for(let j = 0; j<$scope.projectNotes.length; j++)
-								if($scope.projectNotes[j]._id==src.note._id) {
-									$scope.projectNotes.splice(j, 1);
-									break;
-								}
-							$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
-							parayer.ui.showSnackbar('Note deleted!	', 'info');
-						}
-						else
-							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 					}
 					else
 						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-				});					
-			});				
+				});
+			});
 		}
 	}
 	
@@ -267,5 +265,39 @@ angular.module('parayer.projectView', ['ngRoute'])
 			else
 				noteCntnr.style.display = 'none';
 		}
+	}
+	
+	// -- Project TASKS management --
+	$scope.taskChanges = [];
+	$scope.trackTaskChange = function(src) {
+		
+		console.log('To be implemented!');
+	}	
+	
+	$scope.updateTasks = function(src) {
+		
+		console.log('To be implemented!');
+	}	
+	
+	$scope.newTask = function() {
+		
+		console.log('To be implemented!');
+	}
+	
+	$scope.deleteTask = function(src, confirmed) {
+		
+		if(!confirmed) {			
+			parayer.ui.showSimpleConfirmDialog('Task deletion can\'t be undone, please confirm.', 
+				function() { $scope.deleteTask(src, true) }, function() { parayer.ui.showSnackbar('Task deletion cancelled!') });
+			return;
+		}
+		else {
+			console.log('To be implemented!');
+		}
+	}
+	
+	$scope.filterTasksByText = function(src) {
+		
+		console.log('To be implemented!');
 	}
 }]);

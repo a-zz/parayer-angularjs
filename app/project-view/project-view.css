@@ -21,4 +21,56 @@ div#decntnr-cntnr {
 label#note-filter-text {
 	height: 2em;
 }
+
+label#task-filter-text {
+	height: 2em;
+}
+
+div.task-cntnr {
+	margin: 1em;
+	padding: 0.5em;
+	background: whitesmoke;
+}
+
+select#task-pc-input {
+	text-align: right;
+}
+
+div.task-header-left {
+	float: left;
+	vertical-align: bottom;
+}
+
+input.task-summary {
+	font-size: 120%;
+	font-weight: bold;
+	border: none;
+	background: transparent;
+	width:80%;
+}
+
+div.task-header-right {
+	float: right;
+	vertical-align: bottom;
+}
+
+label.task-control {
+	height: 2em;
+}
+
+.task-control-icon {
+	margin-left: 0em;
+	margin-right: 0.5em;
+}
+
+textarea.task-descr {
+	font-family: sans;
+	border: none;
+	background: transparent;
+}
+
+span.task-meta {
+	font-size: 90%;
+	font-style: italic;
+}
 /* ************************************************************************** */
