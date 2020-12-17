@@ -227,6 +227,28 @@ angular.module('parayer.projectView', ['ngRoute'])
 						}
 						else
 							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+		if(!confirmed) {			
+			parayer.ui.showSimpleConfirmDialog('Note deletion can\'t be undone, please confirm', 
+				function() { $scope.deleteNote(src, true) }, function() { parayer.ui.showSnackbar('Note deletion cancelled!') });
+			return;
+		}
+		else {
+			let dbObjUrl = `/_data/${src.note._id}`;
+			$http.get(dbObjUrl).then(function(qryResp) {					
+				var note = qryResp.data;
+				$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
+					if(delResp.status==200) {
+						if(delResp.statusText=='OK') {
+							for(let j = 0; j<$scope.projectNotes.length; j++)
+								if($scope.projectNotes[j]._id==src.note._id) {
+									$scope.projectNotes.splice(j, 1);
+									break;
+								}
+							$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
+							parayer.ui.showSnackbar('Note deleted!	', 'info');
+						}
+						else
+							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 					}
 					else
 						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
