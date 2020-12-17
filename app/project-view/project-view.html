@@ -170,6 +170,7 @@
 	<div class="detab" id="tab-tasks-decntnr">
 		<div class="detab-control-cntnr">
 			<div class="detab-control-cntnr-left">
+<<<<<<< HEAD
 				Found {{project.tasks.length}} tasks (? completed)&nbsp;
 				<button class="mdc-button mdc-button--outlined" title="Add new task" ng-click="newTask();">
 					<span class="mdc-button__label">New task</span>
@@ -242,6 +243,75 @@
 							</label>&nbsp;
 							<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon task-control-icon" title="Mark as completed" 
 								ng-click="task.pc='100'; trackTaskChange(this);">
+=======
+				Found {{project.tasks.length}} tasks&nbsp;
+				<button class="mdc-button mdc-button--outlined" title="Add new task" ng-click="newTask();">
+					<span class="mdc-button__label">New task</span>
+				</button>
+			</div>
+			<div class="detab-control-cntnr-right">
+				<span class="material-icons">search</span>
+				<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label" id="task-filter-text">
+					<span class="mdc-notched-outline">
+						<span class="mdc-notched-outline__leading"></span>
+						<span class="mdc-notched-outline__trailing"></span>
+					</span>
+  					<input type="text" class="mdc-text-field__input" id="task-filter-text-input" aria-label="Filter tasks by..." placeholder="Filter tasks by..."
+						ng-model="taskFilterText" ng-change="filterTasksByText();">
+				</label>
+			</div>
+		</div>
+		<div class="detab-list-cntnr">
+			<div class="mdc-card task-cntnr" ng-repeat="task in project.tasks" id="project-task-{{task._id}}">
+	  			<div class="mdc-card__primary-action">
+					<div class="task-header">
+						<div class="task-header-left">
+							<input id="project-task-{{task._id}}-summary" class="task-summary" value="{{task.summary}}" placeholder="Task summary"
+								ng-model="task.summary" ng-change="trackTaskChange(this);" ng-blur="updateTasks(this);"/>	
+						</div>
+						<div class="task-header-right">
+							<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label task-control" id="task-assigned-users">
+								<span class="material-icons task-control-icon" title="Assigned to...">supervisor_account</span>
+								<span class="mdc-notched-outline">
+									<span class="mdc-notched-outline__leading"></span>
+									<span class="mdc-notched-outline__trailing"></span>
+								</span>
+  								<input type="text" class="mdc-text-field__input task-control" id="task-assigned-users" aria-label="Assigned users"
+									ng-model="task.usrAssignList" ng-change="trackTaskChange(this);">
+							</label>&nbsp;
+							<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label task-control" id="task-date-due">
+								<span class="material-icons task-control-icon" title="Task due date">event</span>
+								<span class="mdc-notched-outline">
+									<span class="mdc-notched-outline__leading"></span>
+									<span class="mdc-notched-outline__trailing"></span>
+								</span>
+  								<input type="date" class="mdc-text-field__input task-control" id="task-due-date-input" aria-label="Task due date"
+									ng-model="task.dateDue" ng-change="trackTaskChange(this);">
+							</label>&nbsp;
+							<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label task-control" id="task-pc">
+								<span class="material-icons task-control-icon" title="Task progress">forward</span>
+								<span class="mdc-notched-outline">
+									<span class="mdc-notched-outline__leading"></span>
+									<span class="mdc-notched-outline__trailing"></span>
+								</span>
+  								<select class="mdc-text-field__input" id="task-pc-input" aria-label="Task progress"
+									ng-model="task.pc" ng-change="trackTaskChange(this);">
+									<option value="0">0%</option>
+									<option value="10">10%</option>
+									<option value="20">20%</option>
+									<option value="30">30%</option>
+									<option value="40">40%</option>
+									<option value="50">50%</option>
+									<option value="60">60%</option>
+									<option value="70">70%</option>
+									<option value="80">80%</option>
+									<option value="90">90%</option>
+									<option value="100">100%</option>
+  								</select>
+							</label>&nbsp;
+							<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon task-control-icon" title="Mark as completed" 
+								ng-click="task.pc='100';">
+>>>>>>> branch 'project-tasks' of https://github.com/a-zz/parayer.git
 	      						check_circle
 	      					</button>
 						</div>

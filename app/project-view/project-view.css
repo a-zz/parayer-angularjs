@@ -29,7 +29,11 @@ label#task-filter-text {
 div.task-cntnr {
 	margin: 1em;
 	padding: 0.5em;
+<<<<<<< HEAD
 	background: mintcream;
+=======
+	background: whitesmoke;
+>>>>>>> branch 'project-tasks' of https://github.com/a-zz/parayer.git
 }
 
 select#task-pc-input {

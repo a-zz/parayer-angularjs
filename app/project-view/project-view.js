@@ -80,7 +80,12 @@ angular.module('parayer.projectView', ['ngRoute'])
 						"usrAssignList": getResp.data.rows[i].value.usrAssignList
 					});
 				}
+<<<<<<< HEAD
 				$scope.project.tasks = _.sortBy(projectTasksFromDb, ['pc']); 
+=======
+				// TODO Default sorting for tasks should be: dueDate desc (the sooner, the more urgent), pc asc (less-progressed first); custom sorting func required
+				$scope.project.tasks = _.sortBy(projectTasksFromDb, ['dueDate', 'pc']); 
+>>>>>>> branch 'project-tasks' of https://github.com/a-zz/parayer.git
 				parayer.ui.showWait(false);
 			});
 			break;
