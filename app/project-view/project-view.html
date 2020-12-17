@@ -179,19 +179,63 @@
 					<span class="mdc-button__label">Purge completed tasks</span>
 				</button>				
 			</div>
-			<div class="detab-control-cntnr-right">
-				Sort by:&nbsp;(·)&nbsp;% completed&nbsp;(·)&nbsp;due date&nbsp;(·)&nbsp;creation date&nbsp;(·)&nbsp;last update&nbsp;
-				<span class="material-icons">search</span>
-				<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label" id="task-filter-text">
-					<span class="mdc-notched-outline">
-						<span class="mdc-notched-outline__leading"></span>
-						<span class="mdc-notched-outline__trailing"></span>
-					</span>
-  					<input type="text" class="mdc-text-field__input" id="task-filter-text-input" aria-label="Filter tasks by..." placeholder="Filter tasks by..."
-						ng-model="taskFilterText" ng-change="filterTasksByText();">
-				</label>
+			<div class="detab-control-cntnr-right" style="display: table;">
+				<div style="display: table-row;">
+					<div style="display: table-cell;">
+						Sort by:&nbsp;
+					</div>
+					<div style="display: table-cell;">
+						<div class="mdc-chip-set mdc-chip-set--choice">
+							<div class="mdc-chip mdc-chip--selected">
+								<div class="mdc-chip__ripple"></div>
+								<span role="gridcell">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+										<span class="mdc-chip__text">% completed</span>
+									</span>
+								</span>
+							</div>
+							<div class="mdc-chip">
+								<div class="mdc-chip__ripple"></div>
+								<span role="gridcell">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+										<span class="mdc-chip__text">due date</span>
+									</span>
+								</span>
+							</div>
+							<div class="mdc-chip">
+								<div class="mdc-chip__ripple"></div>
+								<span role="gridcell">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+										<span class="mdc-chip__text">creation date</span>
+									</span>
+								</span>
+							</div>
+							<div class="mdc-chip">
+								<div class="mdc-chip__ripple"></div>
+								<span role="gridcell">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+										<span class="mdc-chip__text">updated</span>
+									</span>
+								</span>
+							</div>
+						</div>
+					</div>
+					&nbsp;&nbsp;&nbsp;
+					<div style="display: table-cell;">
+						<span class="material-icons">search</span>
+						<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label" id="task-filter-text">
+							<span class="mdc-notched-outline">
+								<span class="mdc-notched-outline__leading"></span>
+								<span class="mdc-notched-outline__trailing"></span>
+							</span>
+		  					<input type="text" class="mdc-text-field__input" id="task-filter-text-input" aria-label="Filter tasks by..." placeholder="Filter tasks by..."
+								ng-model="taskFilterText" ng-change="filterTasksByText();">
+						</label>
+					</div>
+				</div>
 			</div>
 		</div>
+		<br/>
 		<div class="detab-list-cntnr">
 			<div class="mdc-card task-cntnr" ng-repeat="task in project.tasks" id="project-task-{{task._id}}">
 	  			<div class="mdc-card__primary-action">
