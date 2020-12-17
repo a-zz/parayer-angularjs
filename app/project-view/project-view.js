@@ -80,7 +80,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						"usrAssignList": getResp.data.rows[i].value.usrAssignList
 					});
 				}
-				$scope.project.tasks = _.sortBy(projectTasksFromDb, ['pc']); 
+				$scope.project.tasks = $scope.sortTasks(projectTasksFromDb); 
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -267,20 +267,104 @@ angular.module('parayer.projectView', ['ngRoute'])
 	}
 	
 	// -- Project TASKS management --
+	// TODO Second click on a chip should reverse the sort
+	$scope.setTaskSort = function(selected) {
+		
+		let sortChips = document.querySelectorAll('div.mdc-chip');
+		for(let i = 0; i<sortChips.length; i++)
+			if(sortChips[i].id==`task-sort-${selected}`)
+				sortChips[i].classList.add('mdc-chip--selected');
+			else
+				sortChips[i].classList.remove('mdc-chip--selected');
+		$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+	}
+	 
+	$scope.sortTasks = function(src) {
+		
+		let sortBy = document.querySelector('div.mdc-chip--selected').id.substring(10);
+		if(sortBy=='created.date' || sortBy=='pc')
+			return _.sortBy(src, [sortBy]);
+		else
+			return _.reverse(_.sortBy(src, [sortBy]));
+	}
+	
 	$scope.taskChanges = [];
 	$scope.trackTaskChange = function(src) {
 		
-		console.log('To be implemented!');
+		if($scope.taskChanges.indexOf(src.task._id)==-1)
+			$scope.taskChanges.push(src.task._id);
 	}	
 	
 	$scope.updateTasks = function(src) {
 		
-		console.log('To be implemented!');
+		for(let i = 0; i<$scope.taskChanges.length; i++) {	
+			if($scope.taskChanges[i]==src.task._id) {
+				let dbObjUrl = `/_data/${src.task._id}`; 
+				$http.get(dbObjUrl).then(function(getResp) {					
+					var task = getResp.data;
+					task.summary = src.task.summary;
+					task.descr = src.task.descr;
+					task.pc = parseInt(src.task.pc);
+					task.dateDue = src.task.dateDue;
+					task.updated = {"usr": parayer.auth.getUsrId(), "date":  $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss')};
+					// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples	
+					if(task.summary.trim()=='') {
+						parayer.ui.showSnackbar('A task summary is required!', 'warn');
+						$scope.taskChanges.splice(i, 1);
+						return;
+					}
+					$http.put(dbObjUrl, JSON.stringify(task)).then(function(putResp) {
+						if(putResp.status==200) {
+							if(putResp.statusText=='OK') {
+								$scope.taskChanges.splice(i, 1);
+								for(let j = 0; j<$scope.project.tasks.length; j++)
+									if($scope.project.tasks[j]._id==src.task._id)
+										$scope.project.tasks[j] = task;
+								$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+							}
+							else
+								parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+						}
+						else
+							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+					});					
+				});				
+				break;
+			}
+		}
 	}	
 	
 	$scope.newTask = function() {
 		
-		console.log('To be implemented!');
+		$http.get('/_uuid').then(function(respUuid) {
+			let uuid = respUuid.data.uuid;
+			let task = {};
+			task._id = uuid;
+			task.type = 'ProjectTask';
+			task.summary = 'New task';
+			task.descr = '';
+			task.pc = 0;
+			task.dateDue = '';
+			task.created = {"usr": parayer.auth.getUsrId(), "date":  $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss')};
+			task.updated = {"usr": parayer.auth.getUsrId(), "date":  $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss')};
+			task.project = $scope.project._id;
+			task.usrAssignList = [parayer.auth.getUsrId()];
+			let dbObjUrl = `/_data/${uuid}`;	
+			$http.put(dbObjUrl, JSON.stringify(task)).then(function(putResp) {
+				if(putResp.status==200) {
+					if(putResp.statusText=='OK') {
+						$scope.project.tasks.unshift(task);
+						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+						// TODO Focus new note's summary input
+					}
+					else
+						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+				}
+				else
+					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+					
+			});
+		});
 	}
 	
 	$scope.deleteTask = function(src, confirmed) {
@@ -291,12 +375,39 @@ angular.module('parayer.projectView', ['ngRoute'])
 			return;
 		}
 		else {
-			console.log('To be implemented!');
+			let dbObjUrl = `/_data/${src.task._id}`;
+			$http.get(dbObjUrl).then(function(qryResp) {
+				var task = qryResp.data;
+				$http.delete(`${dbObjUrl}?rev=${task._rev}`).then(function(delResp) {
+					if(delResp.status==200) {
+						if(delResp.statusText=='OK') {
+							for(let j = 0; j<$scope.project.tasks.length; j++)
+								if($scope.project.tasks[j]._id==src.task._id) {
+									$scope.project.tasks.splice(j, 1);
+									break;
+								}
+							$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+							parayer.ui.showSnackbar('Task deleted!	', 'info');
+						}
+						else
+							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+					}
+					else
+						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+				});
+			});
 		}
 	}
 	
 	$scope.filterTasksByText = function(src) {
 		
-		console.log('To be implemented!');
+		for(let i = 0; i<$scope.project.tasks.length; i++) {
+			let taskCntnr = document.getElementById(`project-task-${$scope.project.tasks[i]._id}`);
+			if($scope.project.tasks[i].summary.toUpperCase().indexOf($scope.taskFilterText.toUpperCase())!=-1 || 
+				$scope.project.tasks[i].descr.toUpperCase().indexOf($scope.taskFilterText.toUpperCase())!=-1)
+				taskCntnr.style.display = '';
+			else
+				taskCntnr.style.display = 'none';
+		}
 	}
 }]);

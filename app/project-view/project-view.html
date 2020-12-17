@@ -175,8 +175,8 @@
 					<span class="mdc-button__label">New task</span>
 				</button>
 				&nbsp;
-				<button class="mdc-button mdc-button--outlined" title="Purge completed tasks" ng-click="purgeTasks();">
-					<span class="mdc-button__label">Purge completed tasks</span>
+				<button class="mdc-button mdc-button--outlined" title="Delete completed tasks" ng-click="purgeTasks();">
+					<span class="mdc-button__label">Purge</span>
 				</button>				
 			</div>
 			<div class="detab-control-cntnr-right" style="display: table;">
@@ -186,34 +186,34 @@
 					</div>
 					<div style="display: table-cell;">
 						<div class="mdc-chip-set mdc-chip-set--choice">
-							<div class="mdc-chip mdc-chip--selected">
+							<div class="mdc-chip mdc-chip--selected" id="task-sort-pc">
 								<div class="mdc-chip__ripple"></div>
 								<span role="gridcell">
-									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action" ng-click="setTaskSort('pc');">
 										<span class="mdc-chip__text">% completed</span>
 									</span>
 								</span>
 							</div>
-							<div class="mdc-chip">
+							<div class="mdc-chip" id="task-sort-dateDue">
 								<div class="mdc-chip__ripple"></div>
 								<span role="gridcell">
-									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action" ng-click="setTaskSort('dateDue');">
 										<span class="mdc-chip__text">due date</span>
 									</span>
 								</span>
 							</div>
-							<div class="mdc-chip">
+							<div class="mdc-chip" id="task-sort-created.date">
 								<div class="mdc-chip__ripple"></div>
 								<span role="gridcell">
-									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action" ng-click="setTaskSort('created.date');">
 										<span class="mdc-chip__text">creation date</span>
 									</span>
 								</span>
 							</div>
-							<div class="mdc-chip">
+							<div class="mdc-chip" id="task-sort-updated.date">
 								<div class="mdc-chip__ripple"></div>
 								<span role="gridcell">
-									<span role="button" tabindex="0" class="mdc-chip__primary-action">
+									<span role="button" tabindex="0" class="mdc-chip__primary-action" ng-click="setTaskSort('updated.date');">
 										<span class="mdc-chip__text">updated</span>
 									</span>
 								</span>
@@ -297,9 +297,8 @@
 					</textarea>	
 				</div>
 				<div class="mdc-card__action-icons">
-					Created / updated:&nbsp;
-					<span class="task-meta">["{{task.created.usr}}"] (TODO) ({{task.created.date}})</span>&nbsp;/&nbsp;
-					<span class="task-meta">["{{task.created.usr}}"] (TODO) ({{task.updated.date}})</span>
+					<span class="task-meta">Created by:&nbsp; "{{task.created.usr}}" (TODO) ({{task.created.date}})</span>
+					<span class="task-meta" ng-if="task.created.date!=task.updated.date">; Updated by "{{task.created.usr}}" (TODO) ({{task.updated.date}})</span>
 					<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete" ng-click="deleteTask(this);">
 						delete
 					</button>
