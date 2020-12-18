@@ -73,7 +73,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						"_id": getResp.data.rows[i].id, 
 						"summary": getResp.data.rows[i].value.summary, 
 						"descr": getResp.data.rows[i].value.descr, 
-						"pc": getResp.data.rows[i].value.pc, 
+						"pc": `${getResp.data.rows[i].value.pc}`, 
 						"dateDue": getResp.data.rows[i].value.dateDue,
 						"created": getResp.data.rows[i].value.created,
 						"updated": getResp.data.rows[i].value.updated,
@@ -281,9 +281,16 @@ angular.module('parayer.projectView', ['ngRoute'])
 	 
 	$scope.sortTasks = function(src) {
 		
+		$scope.project.tasksCompleted = 0;
+		_.forEach(src, function(task) {
+			if(task.pc=='100') 				
+				$scope.project.tasksCompleted++; 
+		});
 		let sortBy = document.querySelector('div.mdc-chip--selected').id.substring(10);
-		if(sortBy=='created.date' || sortBy=='pc')
-			return _.sortBy(src, [sortBy]);
+		if(sortBy=='created.date')
+			return _.sortBy(src, [sortBy])
+		else if(sortBy=='pc') // FIXME Not working; sorting func needed
+			return _.sortBy(src, [function(task) { return parseInt(task.pc); }]);
 		else
 			return _.reverse(_.sortBy(src, [sortBy]));
 	}
@@ -317,6 +324,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						if(putResp.status==200) {
 							if(putResp.statusText=='OK') {
 								$scope.taskChanges.splice(i, 1);
+								task.pc = `${task.pc}`;
 								for(let j = 0; j<$scope.project.tasks.length; j++)
 									if($scope.project.tasks[j]._id==src.task._id)
 										$scope.project.tasks[j] = task;
@@ -353,6 +361,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			$http.put(dbObjUrl, JSON.stringify(task)).then(function(putResp) {
 				if(putResp.status==200) {
 					if(putResp.statusText=='OK') {
+						task.pc = `${task.pc}`;
 						$scope.project.tasks.unshift(task);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						// TODO Focus new note's summary input
@@ -395,6 +404,21 @@ angular.module('parayer.projectView', ['ngRoute'])
 					else
 						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 				});
+			});
+		}
+	}
+	
+	$scope.purgeTasks = function(confirmed) {
+		
+		if(!confirmed) {			
+			parayer.ui.showSimpleConfirmDialog('Task deletion can\'t be undone, please confirm.', 
+				function() { $scope.purgeTasks(true) }, function() { parayer.ui.showSnackbar('Task purge cancelled!') });
+			return;
+		}
+		else {
+			_.forEach($scope.project.tasks, function(task) {
+				if(task.pc==100)
+					$scope.deleteTask({"task": task}, true);
 			});
 		}
 	}

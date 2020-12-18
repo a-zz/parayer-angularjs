@@ -170,7 +170,7 @@
 	<div class="detab" id="tab-tasks-decntnr">
 		<div class="detab-control-cntnr">
 			<div class="detab-control-cntnr-left">
-				Found {{project.tasks.length}} tasks (? completed)&nbsp;
+				Found {{project.tasks.length}} tasks ({{project.tasksCompleted}} completed)&nbsp;
 				<button class="mdc-button mdc-button--outlined" title="Add new task" ng-click="newTask();">
 					<span class="mdc-button__label">New task</span>
 				</button>
@@ -241,8 +241,8 @@
 	  			<div class="mdc-card__primary-action">
 					<div class="task-header">
 						<div class="task-header-left">
-							<input id="project-task-{{task._id}}-summary" class="task-summary" value="{{task.summary}}" placeholder="Task summary"
-								ng-model="task.summary" ng-change="trackTaskChange(this);" ng-blur="updateTasks(this);"/>	
+							<input class="task-summary" id="project-task-{{task._id}}-summary" value="{{task.summary}}" placeholder="Task summary"
+								ng-readonly="task.pc=='100'" ng-model="task.summary" ng-change="trackTaskChange(this);" ng-blur="updateTasks(this);"/>	
 						</div>
 						<div class="task-header-right">
 							<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label task-control" id="task-assigned-users">
@@ -252,7 +252,7 @@
 									<span class="mdc-notched-outline__trailing"></span>
 								</span>
   								<input type="text" class="mdc-text-field__input task-control" id="task-assigned-users" aria-label="Assigned users"
-									ng-model="task.usrAssignList" ng-change="trackTaskChange(this);">
+									readonly="readonly" ng-model="task.usrAssignList">
 							</label>&nbsp;
 							<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label task-control" id="task-date-due">
 								<span class="material-icons task-control-icon" title="Task due date">event</span>
@@ -261,7 +261,7 @@
 									<span class="mdc-notched-outline__trailing"></span>
 								</span>
   								<input type="date" class="mdc-text-field__input task-control" id="task-due-date-input" aria-label="Task due date"
-									ng-model="task.dateDue" ng-change="trackTaskChange(this);">
+									ng-readonly="task.pc=='100'" ng-model="task.dateDue" ng-change="trackTaskChange(this);" ng-blur="updateTasks(this);"">
 							</label>&nbsp;
 							<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label task-control" id="task-pc">
 								<span class="material-icons task-control-icon" title="Task progress">forward</span>
@@ -270,7 +270,7 @@
 									<span class="mdc-notched-outline__trailing"></span>
 								</span>
   								<select class="mdc-text-field__input" id="task-pc-input" aria-label="Task progress"
-									ng-model="task.pc" ng-change="trackTaskChange(this);">
+									ng-model="task.pc" ng-click="trackTaskChange(this);" ng-blur="updateTasks(this);"">
 									<option value="0">0%</option>
 									<option value="10">10%</option>
 									<option value="20">20%</option>
@@ -285,14 +285,14 @@
   								</select>
 							</label>&nbsp;
 							<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon task-control-icon" title="Mark as completed" 
-								ng-click="task.pc='100'; trackTaskChange(this);">
+								ng-disabled="task.pc=='100'" ng-click="task.pc='100'; trackTaskChange(this); updateTasks(this);">
 	      						check_circle
 	      					</button>
 						</div>
 	  				</div>					
 					<br>
 					<textarea id="project-task-{{task._id}}-descr" class="task-descr"					
-						ng-model="task.descr" ng-change="trackTaskChange(this);" ng-blur="updateTasks(this);">
+						ng-readonly="task.pc=='100'" ng-model="task.descr" ng-change="trackTaskChange(this);" ng-blur="updateTasks(this);">
 						{{task.descr}}
 					</textarea>	
 				</div>

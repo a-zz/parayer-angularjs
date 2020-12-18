@@ -46,7 +46,11 @@ input.task-summary {
 	font-weight: bold;
 	border: none;
 	background: transparent;
-	width:80%;
+	width:100%;
+}
+
+input.task-summary:read-only {
+	text-decoration: line-through;
 }
 
 div.task-header-right {
