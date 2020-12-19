@@ -297,8 +297,12 @@
 					</textarea>	
 				</div>
 				<div class="mdc-card__action-icons">
-					<span class="task-meta">Created by:&nbsp; "{{task.created.usr}}" (TODO) ({{task.created.date}})</span>
-					<span class="task-meta" ng-if="task.created.date!=task.updated.date">; Updated by "{{task.created.usr}}" (TODO) ({{task.updated.date}})</span>
+					<span class="task-meta">
+						Created by:&nbsp; "{{task.created.usr}}" (TODO) ({{task.created.date}})
+					</span>
+					<span class="task-meta" ng-if="task.created.date!=task.updated.date">
+						; updated by "{{task.created.usr}}" (TODO) ({{task.updated.date}})
+					</span>
 					<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete" ng-click="deleteTask(this);">
 						delete
 					</button>

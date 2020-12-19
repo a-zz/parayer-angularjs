@@ -74,9 +74,15 @@ angular.module('parayer.projectView', ['ngRoute'])
 						"summary": getResp.data.rows[i].value.summary, 
 						"descr": getResp.data.rows[i].value.descr, 
 						"pc": `${getResp.data.rows[i].value.pc}`, 
-						"dateDue": getResp.data.rows[i].value.dateDue,
-						"created": getResp.data.rows[i].value.created,
-						"updated": getResp.data.rows[i].value.updated,
+						"dateDue": getResp.data.rows[i].value.dateDue!=''?new Date(Date.parse(getResp.data.rows[i].value.dateDue)):'',
+						"created": { 
+							"usr": getResp.data.rows[i].value.created.usr,
+							"date": new Date(Date.parse(getResp.data.rows[i].value.created.date)).toLocaleString()
+						},
+						"updated": {
+							"usr": getResp.data.rows[i].value.updated.usr,
+							"date": new Date(Date.parse(getResp.data.rows[i].value.updated.date)).toLocaleString()
+						},
 						"usrAssignList": getResp.data.rows[i].value.usrAssignList
 					});
 				}
@@ -289,7 +295,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		let sortBy = document.querySelector('div.mdc-chip--selected').id.substring(10);
 		if(sortBy=='created.date')
 			return _.sortBy(src, [sortBy])
-		else if(sortBy=='pc') // FIXME Not working; sorting func needed
+		else if(sortBy=='pc') 
 			return _.sortBy(src, [function(task) { return parseInt(task.pc); }]);
 		else
 			return _.reverse(_.sortBy(src, [sortBy]));
@@ -312,8 +318,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 					task.summary = src.task.summary;
 					task.descr = src.task.descr;
 					task.pc = parseInt(src.task.pc);
-					task.dateDue = src.task.dateDue;
-					task.updated = {"usr": parayer.auth.getUsrId(), "date":  $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss')};
+					task.dateDue = (src.task.dateDue!=null && src.task.dateDue!='')?src.task.dateDue.toISOString():'';
+					task.updated = {"usr": parayer.auth.getUsrId(), "date": new Date().toISOString()};
 					// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples	
 					if(task.summary.trim()=='') {
 						parayer.ui.showSnackbar('A task summary is required!', 'warn');
@@ -325,6 +331,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 							if(putResp.statusText=='OK') {
 								$scope.taskChanges.splice(i, 1);
 								task.pc = `${task.pc}`;
+								task.dateDue = (task.dateDue!=null && task.dateDue!='')?new Date(Date.parse(task.dateDue)):'';
+								task.created.date = new Date(Date.parse(task.created.date)).toLocaleString();
+								task.updated.date = new Date(Date.parse(task.updated.date)).toLocaleString();
 								for(let j = 0; j<$scope.project.tasks.length; j++)
 									if($scope.project.tasks[j]._id==src.task._id)
 										$scope.project.tasks[j] = task;
@@ -353,8 +362,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 			task.descr = '';
 			task.pc = 0;
 			task.dateDue = '';
-			task.created = {"usr": parayer.auth.getUsrId(), "date":  $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss')};
-			task.updated = {"usr": parayer.auth.getUsrId(), "date":  $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss')};
+			task.created = {"usr": parayer.auth.getUsrId(), "date":  new Date().toISOString()};
+			task.updated = {"usr": parayer.auth.getUsrId(), "date":  new Date().toISOString()};
 			task.project = $scope.project._id;
 			task.usrAssignList = [parayer.auth.getUsrId()];
 			let dbObjUrl = `/_data/${uuid}`;	
@@ -362,6 +371,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 				if(putResp.status==200) {
 					if(putResp.statusText=='OK') {
 						task.pc = `${task.pc}`;
+						task.created.date = new Date(Date.parse(task.created.date)).toLocaleString();
+						task.updated.date = new Date(Date.parse(task.updated.date)).toLocaleString(); 
 						$scope.project.tasks.unshift(task);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						// TODO Focus new note's summary input
