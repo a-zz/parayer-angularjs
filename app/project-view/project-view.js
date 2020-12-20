@@ -11,7 +11,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 }])
 .controller('projectViewCtrl', ['$routeParams', '$scope', '$http', '$filter', function($routeParams, $scope, $http, $filter) {
 		
-	// UI setup
+	// -- UI setup ---------------------------------------------------------------------------------------------------------------------------------------------
 	// TODO Check tabindex-based navigation (may be faulty because of tabs)	
 	parayer.ui.setLocation('Project');
 	parayer.ui.showWait(true);
@@ -40,7 +40,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			$scope.loadTabContent(e.detail.tabId);
 		});
 	
-	// Scope initialization
+	// -- Scope initialization ---------------------------------------------------------------------------------------------------------------------------------
 	$scope.loadTabContent = function(tabId) {
 		switch(tabId) {
 		case 'tab-notes':
@@ -64,27 +64,13 @@ angular.module('parayer.projectView', ['ngRoute'])
 			});
 			break;
 		case 'tab-tasks':
-			$scope.objDataUrl = `/_data/_design/project/_view/tasks-by-project?key="${$routeParams.projectId}"`;
+			// TODO Optimize view: not all fields are required to be emitted as we're using &include_docs=true
+			$scope.objDataUrl = `/_data/_design/project/_view/tasks-by-project?key="${$routeParams.projectId}"&include_docs=true`;
 			$http.get($scope.objDataUrl).then(function(getResp) {				
 				$scope.project.tasks = [];
 				let projectTasksFromDb = [];
 				for(let i = 0; i<getResp.data.rows.length; i++) {
-					projectTasksFromDb.push({
-						"_id": getResp.data.rows[i].id, 
-						"summary": getResp.data.rows[i].value.summary, 
-						"descr": getResp.data.rows[i].value.descr, 
-						"pc": `${getResp.data.rows[i].value.pc}`, 
-						"dateDue": getResp.data.rows[i].value.dateDue!=''?new Date(Date.parse(getResp.data.rows[i].value.dateDue)):'',
-						"created": { 
-							"usr": getResp.data.rows[i].value.created.usr,
-							"date": new Date(Date.parse(getResp.data.rows[i].value.created.date)).toLocaleString()
-						},
-						"updated": {
-							"usr": getResp.data.rows[i].value.updated.usr,
-							"date": new Date(Date.parse(getResp.data.rows[i].value.updated.date)).toLocaleString()
-						},
-						"usrAssignList": getResp.data.rows[i].value.usrAssignList
-					});
+					projectTasksFromDb.push(new VProjectTask(getResp.data.rows[i].doc));
 				}
 				$scope.project.tasks = $scope.sortTasks(projectTasksFromDb); 
 				parayer.ui.showWait(false);
@@ -135,7 +121,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	$scope.loadTabContent('tab-general');
 	parayer.ui.showWait(false);
 		
-	// Event handlers
+	// -- View worker ------------------------------------------------------------------------------------------------------------------------------------------
 	$scope.showTab = function(tabId) {
 		
 		parayer.ui.showWait(true);
@@ -293,92 +279,56 @@ angular.module('parayer.projectView', ['ngRoute'])
 				$scope.project.tasksCompleted++; 
 		});
 		let sortBy = document.querySelector('div.mdc-chip--selected').id.substring(10);
-		if(sortBy=='created.date')
+		if(sortBy=='created.date' || sortBy=='dateDue')
 			return _.sortBy(src, [sortBy])
 		else if(sortBy=='pc') 
 			return _.sortBy(src, [function(task) { return parseInt(task.pc); }]);
 		else
 			return _.reverse(_.sortBy(src, [sortBy]));
 	}
-	
-	$scope.taskChanges = [];
-	$scope.trackTaskChange = function(src) {
 		
-		if($scope.taskChanges.indexOf(src.task._id)==-1)
-			$scope.taskChanges.push(src.task._id);
-	}	
+	$scope.updateTask = function(src) {
 	
-	$scope.updateTasks = function(src) {
-		
-		for(let i = 0; i<$scope.taskChanges.length; i++) {	
-			if($scope.taskChanges[i]==src.task._id) {
-				let dbObjUrl = `/_data/${src.task._id}`; 
-				$http.get(dbObjUrl).then(function(getResp) {					
-					var task = getResp.data;
-					task.summary = src.task.summary;
-					task.descr = src.task.descr;
-					task.pc = parseInt(src.task.pc);
-					task.dateDue = (src.task.dateDue!=null && src.task.dateDue!='')?src.task.dateDue.toISOString():'';
-					task.updated = {"usr": parayer.auth.getUsrId(), "date": new Date().toISOString()};
-					// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples	
-					if(task.summary.trim()=='') {
-						parayer.ui.showSnackbar('A task summary is required!', 'warn');
-						$scope.taskChanges.splice(i, 1);
-						return;
+		let t = src.task;
+		if(t.changed) {			
+			// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples
+			if(t.summary.trim()=='') {
+				parayer.ui.showSnackbar('A task summary is required!', 'warn');
+				$scope.taskChanges.splice(i, 1);
+				return;
+			}				
+			t.setUpdateInfo();
+			let dbObjUrl = `/_data/${t._id}`; 
+			$http.put(dbObjUrl, t.stringify()).then(function(putResp) {
+				if(putResp.status==200) {
+					if(putResp.data.ok) {						
+						t.refresh(putResp.data.rev);
+						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 					}
-					$http.put(dbObjUrl, JSON.stringify(task)).then(function(putResp) {
-						if(putResp.status==200) {
-							if(putResp.statusText=='OK') {
-								$scope.taskChanges.splice(i, 1);
-								task.pc = `${task.pc}`;
-								task.dateDue = (task.dateDue!=null && task.dateDue!='')?new Date(Date.parse(task.dateDue)):'';
-								task.created.date = new Date(Date.parse(task.created.date)).toLocaleString();
-								task.updated.date = new Date(Date.parse(task.updated.date)).toLocaleString();
-								for(let j = 0; j<$scope.project.tasks.length; j++)
-									if($scope.project.tasks[j]._id==src.task._id)
-										$scope.project.tasks[j] = task;
-								$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-							}
-							else
-								parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-						}
-						else
-							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-					});					
-				});				
-				break;
-			}
-		}
+					else
+						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); // TODO Improved this message for troubleshooting
+				}
+				else
+					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');			
+			});
+		}				
 	}	
 	
 	$scope.newTask = function() {
 		
 		$http.get('/_uuid').then(function(respUuid) {
-			let uuid = respUuid.data.uuid;
-			let task = {};
-			task._id = uuid;
-			task.type = 'ProjectTask';
-			task.summary = 'New task';
-			task.descr = '';
-			task.pc = 0;
-			task.dateDue = '';
-			task.created = {"usr": parayer.auth.getUsrId(), "date":  new Date().toISOString()};
-			task.updated = {"usr": parayer.auth.getUsrId(), "date":  new Date().toISOString()};
-			task.project = $scope.project._id;
-			task.usrAssignList = [parayer.auth.getUsrId()];
-			let dbObjUrl = `/_data/${uuid}`;	
-			$http.put(dbObjUrl, JSON.stringify(task)).then(function(putResp) {
+			let t = new VProjectTask(respUuid.data.uuid);
+			let dbObjUrl = `/_data/${t._id}`;	
+			$http.put(dbObjUrl, t.stringify()).then(function(putResp) {
 				if(putResp.status==200) {
-					if(putResp.statusText=='OK') {
-						task.pc = `${task.pc}`;
-						task.created.date = new Date(Date.parse(task.created.date)).toLocaleString();
-						task.updated.date = new Date(Date.parse(task.updated.date)).toLocaleString(); 
-						$scope.project.tasks.unshift(task);
+					if(putResp.data.ok) {
+						t.refresh(putResp.data.rev);
+						$scope.project.tasks.unshift(t);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						// TODO Focus new note's summary input
 					}
 					else
-						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); // TODO Improved this message for troubleshooting
 				}
 				else
 					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
@@ -400,7 +350,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 				var task = qryResp.data;
 				$http.delete(`${dbObjUrl}?rev=${task._rev}`).then(function(delResp) {
 					if(delResp.status==200) {
-						if(delResp.statusText=='OK') {
+						if(delResp.data.ok) {
 							for(let j = 0; j<$scope.project.tasks.length; j++)
 								if($scope.project.tasks[j]._id==src.task._id) {
 									$scope.project.tasks.splice(j, 1);
@@ -410,7 +360,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 							parayer.ui.showSnackbar('Task deleted!	', 'info');
 						}
 						else
-							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+							parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`); // TODO Improved this message for troubleshooting
 					}
 					else
 						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
@@ -445,4 +395,99 @@ angular.module('parayer.projectView', ['ngRoute'])
 				taskCntnr.style.display = 'none';
 		}
 	}
+	
+	// -- View objects -----------------------------------------------------------------------------------------------------------------------------------------
+	function vProject(d) {
+		
+		if(!parayer.util.isUuid(d)) {
+			
+		}
+		else {
+			
+		}
+	}
+	
+	function vProjectNote(d) {
+
+		if(!parayer.util.isUuid(d)) {
+			
+		}
+		else {
+			
+		}		
+	}
+	
+    class VProjectTask {
+	
+        constructor(d) {
+	
+            if (typeof(d)==='object') {
+				// Object from db
+                this._id = d._id;
+                this._rev = d._rev;
+				this.type = d.type;
+                this.summary = d.summary;
+                this.descr = d.descr;
+                this.pc = `${d.pc}`;
+                this.dateDue = d.dateDue != '' ? new Date(Date.parse(d.dateDue)) : null;
+                this.created = {
+                    "usr": d.created.usr,
+                    "date": new Date(Date.parse(d.created.date))
+                },
+                    this.updated = {
+                        "usr": d.updated.usr,
+                        "date": new Date(Date.parse(d.updated.date))
+                    },
+                    this.project = $scope.project._id;
+                this.usrAssignList = d.usrAssignList;
+            }
+            else {
+                // New project task
+				let now = new Date();
+                this._id = d;
+                this.type = 'ProjectTask';
+                this.summary = 'New task';
+                this.descr = '';
+                this.pc = '0';
+                this.dateDue = null;
+                this.created = { "usr": parayer.auth.getUsrId(), "date": now };
+                this.updated = { "usr": parayer.auth.getUsrId(), "date": now };
+                this.project = $scope.project._id;
+                this.usrAssignList = [parayer.auth.getUsrId()];
+            }
+		}
+
+		setUpdateInfo() {
+				
+			// TODO Maybe won't udpate for a given time-windoww after task creation (as they're usually inmmediately updated after creation)
+			this.updated = {
+				"usr": parayer.auth.getUsrId(),
+				"date": new Date()
+			}				
+		}
+
+        stringify() {
+	
+            let o = {
+                "_id": this._id,
+				"_rev": this._rev,
+                "type": this.type,
+                "summary": this.summary,
+                "descr": this.descr,
+                "pc": parseInt(this.pc),
+                "dateDue": this.dateDue != null ? this.dateDue.toISOString() : '',
+                "created": { "usr": this.created.usr, "date": this.created.date.toISOString() },
+                "updated": { "usr": this.updated.usr, "date": this.updated.date.toISOString() },
+                "project": this.project,
+                "usrAssignList": this.usrAssignList
+            };
+            return JSON.stringify(o);
+        }
+
+		refresh(rev) {
+				
+			this.changed = false;
+			this._rev = rev;
+		}
+    }
 }]);

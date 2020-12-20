@@ -79,6 +79,7 @@ else {
 	    	})
 	  	}).on("error", function(err) {
 	  		_log_.error(`db GET request ${couchdbQueryString}: ${err.message}`);
+			res.send(err.message);
 		});
 	    httpReq.end();
 	});
@@ -124,6 +125,7 @@ else {
 	    	})
 	  	}).on("error", function(err) {
 	  		_log_.error('db PUT request ' + couchdbQueryString + ': ' + err.message);
+			res.send(err.message);
 		});
 		httpReq.write(putData);
 	    httpReq.end();
@@ -158,6 +160,7 @@ else {
 	    	})
 	  	}).on("error", function(err) {
 	  		_log_.error(`db DELETE request ${couchdbQueryString}: ${err.message}`);
+			res.send(err.message);
 		});
 	    httpReq.end();
 	});	
