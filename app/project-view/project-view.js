@@ -44,22 +44,16 @@ angular.module('parayer.projectView', ['ngRoute'])
 	$scope.loadTabContent = function(tabId) {
 		switch(tabId) {
 		case 'tab-notes':
-			$scope.objDataUrl = `/_data/_design/global-scope/_view/notes-attached-to?key="${$routeParams.projectId}"`;
-			$http.get($scope.objDataUrl).then(function(respNotes) {
+			// TODO Optimize view: maybe not all fields are required to be emitted as we're using &include_docs=true
+			$scope.objDataUrl = `/_data/_design/global-scope/_view/notes-attached-to?key="${$routeParams.projectId}"&include_docs=true`;
+			$http.get($scope.objDataUrl).then(function(getResp) {
 				// TODO As global, note handling should be moved elsewhere
-				// TODO To be refactored: $scope.projectNotes should rather be $scope.project.notes
-				$scope.projectNotes = [];
+				$scope.project.notes = [];
 				let projectNotesFromDb = [];
-				for(let i = 0; i<respNotes.data.rows.length; i++) {
-					projectNotesFromDb.push({
-						"_id": respNotes.data.rows[i].id, 
-						"summary": respNotes.data.rows[i].value.summary, 
-						"descr": respNotes.data.rows[i].value.descr, 
-						"usr": respNotes.data.rows[i].value.usr, 
-						"date": respNotes.data.rows[i].value.date
-					});
+				for(let i = 0; i<getResp.data.rows.length; i++) {
+					projectNotesFromDb.push(new VProjectNote(getResp.data.rows[i].doc));
 				}
-				$scope.projectNotes = _.reverse(_.sortBy(projectNotesFromDb, ['date', 'summary'])); 
+				$scope.project.notes = _.reverse(_.sortBy(projectNotesFromDb, ['date', 'summary'])); 
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -140,72 +134,45 @@ angular.module('parayer.projectView', ['ngRoute'])
 	// -- Project NOTES management --
 	// TODO As global, note handling should be moved elsewhere	
 	// TODO User-selectable colours for notes would be fine!
-	$scope.noteChanges = [];
-	$scope.trackNoteChange = function(src) {
-		
-		if($scope.noteChanges.indexOf(src.note._id)==-1)
-			$scope.noteChanges.push(src.note._id);
-	}	
-	
-	$scope.updateNotes = function(src) {
-		
-		for(let i = 0; i<$scope.noteChanges.length; i++) {	
-			if($scope.noteChanges[i]==src.note._id) {
-				let dbObjUrl = `/_data/${src.note._id}`; 
-				$http.get(dbObjUrl).then(function(qryResp) {					
-					var note = qryResp.data;
-					note.summary = src.note.summary;
-					note.descr = src.note.descr;
-					note.usr = parayer.auth.getUsrId();
-					note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');
-					// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples	
-					if(note.summary.trim()=='') {
-						parayer.ui.showSnackbar('A note summary is required!', 'warn');
-						$scope.noteChanges.splice(i, 1);
-						return;
+	$scope.updateNote = function(src) {
+
+		let n = src.note;
+		if(n.changed) {			
+			// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples
+			if(n.summary.trim()=='') {
+				parayer.ui.showSnackbar('A note summary is required!', 'warn');
+				return;
+			}			
+			let dbObjUrl = `/_data/${n._id}`; 
+			$http.put(dbObjUrl, n.stringify()).then(function(putResp) {
+				if(putResp.status==200) {
+					if(putResp.data.ok) {						
+						n.refresh(putResp.data.rev);
+						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
 					}
-					$http.put(dbObjUrl, JSON.stringify(note)).then(function(putResp) {
-						if(putResp.status==200) {
-							if(putResp.statusText=='OK') {
-								$scope.noteChanges.splice(i, 1);
-								for(let j = 0; j<$scope.projectNotes.length; j++)
-									if($scope.projectNotes[j]._id==src.note._id)
-										$scope.projectNotes[j] = note;
-								$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
-							}
-							else
-								parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-						}
-						else
-							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-					});					
-				});				
-				break;
-			}
-		}
+					else // TODO Improve this message for (user-level) troubleshooting
+						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
+				}
+				else
+					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');			
+			});
+		}		
 	}	
 	
 	$scope.newNote = function() {
 		
 		$http.get('/_uuid').then(function(respUuid) {
-			let uuid = respUuid.data.uuid;
-			let note = {};
-			note._id = uuid;
-			note.type = 'Note';
-			note.summary = 'New note';
-			note.descr = '';
-			note.usr = parayer.auth.getUsrId();
-			note.date = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');
-			note.attachedTo = $scope.project._id;
-			let dbObjUrl = `/_data/${uuid}`;	
-			$http.put(dbObjUrl, JSON.stringify(note)).then(function(putResp) {
+			let n = new VProjectNote(respUuid.data.uuid);
+			let dbObjUrl = `/_data/${n._id}`;	
+			$http.put(dbObjUrl, n.stringify()).then(function(putResp) {
 				if(putResp.status==200) {
 					if(putResp.statusText=='OK') {
-						$scope.projectNotes.unshift(note);
+						n.refresh(putResp.data.rev);
+						$scope.project.notes.unshift(n);
 						// TODO Focus new note's summary input
 					}
-					else
-						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+					else // TODO Improve this message for (user-level) troubleshooting
+						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`);
 				}
 				else
 					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
@@ -222,36 +189,35 @@ angular.module('parayer.projectView', ['ngRoute'])
 			return;
 		}
 		else {
-			let dbObjUrl = `/_data/${src.note._id}`;
-			$http.get(dbObjUrl).then(function(qryResp) {
-				var note = qryResp.data;
-				$http.delete(`${dbObjUrl}?rev=${note._rev}`).then(function(delResp) {
-					if(delResp.status==200) {
-						if(delResp.statusText=='OK') {
-							for(let j = 0; j<$scope.projectNotes.length; j++)
-								if($scope.projectNotes[j]._id==src.note._id) {
-									$scope.projectNotes.splice(j, 1);
-									break;
-								}
-							$scope.projectNotes = _.reverse(_.sortBy($scope.projectNotes, ['date', 'summary']));
-							parayer.ui.showSnackbar('Note deleted!	', 'info');
-						}
-						else
-							parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+			let n = src.note;
+			let dbObjUrl = `/_data/${n._id}`;
+			$http.delete(`${dbObjUrl}?rev=${n._rev}`).then(function(delResp) {
+				if(delResp.status==200) {
+					if(delResp.statusText=='OK') {
+						for(let j = 0; j<$scope.project.notes.length; j++)
+							if($scope.project.notes[j]._id==n._id) {
+								$scope.project.notes.splice(j, 1);
+								break;
+							}
+						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
+						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
-					else
-						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-				});
+					else // TODO Improve this message for (user-level) troubleshooting
+						parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`);
+				}
+				else
+					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			});
+
 		}
 	}
 	
 	$scope.filterNotesByText = function(src) {
 		
-		for(let i = 0; i<$scope.projectNotes.length; i++) {
-			let noteCntnr = document.getElementById(`project-note-${$scope.projectNotes[i]._id}`);
-			if($scope.projectNotes[i].summary.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1 || 
-				$scope.projectNotes[i].descr.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1)
+		for(let i = 0; i<$scope.project.notes.length; i++) {
+			let noteCntnr = document.getElementById(`project-note-${$scope.project.notes[i]._id}`);
+			if($scope.project.notes[i].summary.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1 || 
+				$scope.project.notes[i].descr.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1)
 				noteCntnr.style.display = '';
 			else
 				noteCntnr.style.display = 'none';
@@ -294,7 +260,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 			// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples
 			if(t.summary.trim()=='') {
 				parayer.ui.showSnackbar('A task summary is required!', 'warn');
-				$scope.taskChanges.splice(i, 1);
 				return;
 			}				
 			t.setUpdateInfo();
@@ -305,13 +270,13 @@ angular.module('parayer.projectView', ['ngRoute'])
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 					}
-					else
-						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); // TODO Improved this message for troubleshooting
+					else // TODO Improve this message for (user-level) troubleshooting
+						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
 					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');			
 			});
-		}				
+		}
 	}	
 	
 	$scope.newTask = function() {
@@ -325,10 +290,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks.unshift(t);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-						// TODO Focus new note's summary input
+						// TODO Focus new task's summary input
 					}
-					else
-						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); // TODO Improved this message for troubleshooting
+					else // TODO Improve this message for (user-level) troubleshooting
+						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
 					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
@@ -347,6 +312,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		else {
 			let dbObjUrl = `/_data/${src.task._id}`;
 			$http.get(dbObjUrl).then(function(qryResp) {
+				// FIXME No need to GET here! (see $scope.deleteNote())
 				var task = qryResp.data;
 				$http.delete(`${dbObjUrl}?rev=${task._rev}`).then(function(delResp) {
 					if(delResp.status==200) {
@@ -359,8 +325,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 							$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 							parayer.ui.showSnackbar('Task deleted!	', 'info');
 						}
-						else
-							parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`); // TODO Improved this message for troubleshooting
+						else // TODO Improve this message for (user-level) troubleshooting
+							parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`); 
 					}
 					else
 						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
@@ -397,23 +363,55 @@ angular.module('parayer.projectView', ['ngRoute'])
 	}
 	
 	// -- View objects -----------------------------------------------------------------------------------------------------------------------------------------
-	function vProject(d) {
+	function VProject(d) {
 		
-		if(!parayer.util.isUuid(d)) {
-			
-		}
-		else {
-			
-		}
+		// TODO To be implemented
 	}
 	
-	function vProjectNote(d) {
+	class VProjectNote {
 
-		if(!parayer.util.isUuid(d)) {
-			
+		constructor(d) {
+		
+			if(typeof(d)==='object') {
+				this._id = d._id;
+				this._rev = d._rev; 
+				this.type = d.type;
+				this.summary = d.summary; 
+				this.descr = d.descr;
+				this.usr = d.usr;
+				this.date = d.date != '' ? new Date(Date.parse(d.date)) : null;
+				this.attachedTo = $scope.project._id;
+			}
+			else {
+				this._id = d;
+				this.type = 'Note';
+				this.summary = 'New note';
+				this.descr = '';
+				this.usr = parayer.auth.getUsrId();
+				this.date = new Date();
+				this.attachedTo = $scope.project._id;				
+			}		
 		}
-		else {
-			
+		
+        stringify() {
+	
+            let o = {
+                "_id": this._id,
+				"_rev": this._rev,
+                "type": this.type,
+                "summary": this.summary,
+                "descr": this.descr,
+				"usr": this.usr,
+				"date": this.date.toISOString(),
+				"attachedTo": this.attachedTo
+            };
+            return JSON.stringify(o);
+        }
+
+		refresh(rev) {
+				
+			this.changed = false;
+			this._rev = rev;
 		}		
 	}
 	
@@ -433,12 +431,12 @@ angular.module('parayer.projectView', ['ngRoute'])
                 this.created = {
                     "usr": d.created.usr,
                     "date": new Date(Date.parse(d.created.date))
-                },
-                    this.updated = {
-                        "usr": d.updated.usr,
-                        "date": new Date(Date.parse(d.updated.date))
-                    },
-                    this.project = $scope.project._id;
+                };
+                this.updated = {
+                	"usr": d.updated.usr,
+                    "date": new Date(Date.parse(d.updated.date))
+                };
+                this.project = $scope.project._id;
                 this.usrAssignList = d.usrAssignList;
             }
             else {
@@ -459,7 +457,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 
 		setUpdateInfo() {
 				
-			// TODO Maybe won't udpate for a given time-windoww after task creation (as they're usually inmmediately updated after creation)
+			// TODO Maybe shouldn't' udpate for a given time-windoww after task creation (as they're usually inmmediately updated after that and thus is useless info)
 			this.updated = {
 				"usr": parayer.auth.getUsrId(),
 				"date": new Date()

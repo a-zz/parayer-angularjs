@@ -129,7 +129,7 @@
 	<div class="detab" id="tab-notes-decntnr">
 		<div class="detab-control-cntnr">
 			<div class="detab-control-cntnr-left">
-				Found {{projectNotes.length}} notes&nbsp;
+				Found {{project.notes.length}} notes&nbsp;
 				<button class="mdc-button mdc-button--outlined" title="Add new note" ng-click="newNote();">
 					<span class="mdc-button__label">New note</span>
 				</button>
@@ -147,18 +147,18 @@
 			</div>
 		</div>
 		<div class="detab-list-cntnr">
-			<div class="mdc-card note-cntnr" ng-repeat="note in projectNotes" id="project-note-{{note._id}}">
+			<div class="mdc-card note-cntnr" ng-repeat="note in project.notes" id="project-note-{{note._id}}">
 	  			<div class="mdc-card__primary-action">
 					<input id="project-note-{{note._id}}-summary" class="note-summary" value="{{note.summary}}" placeholder="Note summary"
-						ng-model="note.summary" ng-change="trackNoteChange(this);" ng-blur="updateNotes(this);"/>
+						ng-model="note.summary" ng-change="note.changed=true;" ng-blur="updateNote(this);"/>
 					<br>
 					<textarea id="project-note-{{note._id}}-descr" class="note-descr"					
-						ng-model="note.descr" ng-change="trackNoteChange(this);" ng-blur="updateNotes(this);">
+						ng-model="note.descr" ng-change="note.changed=true;" ng-blur="updateNote(this);">
 						{{note.descr}}
 					</textarea>	
 	  			</div>
 	    		<div class="mdc-card__action-icons">
-	    			<span class="note-meta">"{{note.usr}}" (TODO) ({{note.date}})</span>
+	    			<span class="note-meta">"{{note.usr}}" (TODO) ({{note.date.toLocaleString()}})</span>
 	      			<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete" ng-click="deleteNote(this);">
 	      				delete
 	      			</button>
