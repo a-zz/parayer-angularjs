@@ -134,6 +134,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	// -- Project NOTES management --
 	// TODO As global, note handling should be moved elsewhere	
 	// TODO User-selectable colours for notes would be fine!
+	// TODO It'd be nice to have /_data operations moved into VProjectNote class (but consider UI callback) 
 	$scope.updateNote = function(src) {
 
 		let n = src.note;
@@ -224,7 +225,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 	}
 	
 	// -- Project TASKS management --
-	// TODO Second click on a chip should reverse the sort
+	// TODO Improvemnet: second click on a chip should reverse the sort
+	// TODO It'd be nice to have /_data operations moved into VProjectTask class (but consider UI callback)
 	$scope.setTaskSort = function(selected) {
 		
 		let sortChips = document.querySelectorAll('div.mdc-chip');
