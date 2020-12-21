@@ -208,7 +208,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 				else
 					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			});
-
 		}
 	}
 	
@@ -310,27 +309,24 @@ angular.module('parayer.projectView', ['ngRoute'])
 			return;
 		}
 		else {
-			let dbObjUrl = `/_data/${src.task._id}`;
-			$http.get(dbObjUrl).then(function(qryResp) {
-				// FIXME No need to GET here! (see $scope.deleteNote())
-				var task = qryResp.data;
-				$http.delete(`${dbObjUrl}?rev=${task._rev}`).then(function(delResp) {
-					if(delResp.status==200) {
-						if(delResp.data.ok) {
-							for(let j = 0; j<$scope.project.tasks.length; j++)
-								if($scope.project.tasks[j]._id==src.task._id) {
-									$scope.project.tasks.splice(j, 1);
-									break;
-								}
-							$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-							parayer.ui.showSnackbar('Task deleted!	', 'info');
-						}
-						else // TODO Improve this message for (user-level) troubleshooting
-							parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`); 
+			let t = src.task;
+			let dbObjUrl = `/_data/${t._id}`;
+			$http.delete(`${dbObjUrl}?rev=${t._rev}`).then(function(delResp) {
+				if(delResp.status==200) {
+					if(delResp.data.ok) {
+						for(let j = 0; j<$scope.project.tasks.length; j++)
+							if($scope.project.tasks[j]._id==t._id) {
+								$scope.project.tasks.splice(j, 1);
+								break;
+							}
+						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+						parayer.ui.showSnackbar('Task deleted!	', 'info');
 					}
-					else
-						parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-				});
+					else // TODO Improve this message for (user-level) troubleshooting
+						parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`); 
+				}
+				else
+					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			});
 		}
 	}
