@@ -3,48 +3,4 @@ major.minor.rev
  major: general version
  minor: new features; db schema
  rev: bugs, errata, code cleanup
-
--- DB object model -- 
-actArea
-  ^
-  actGrp
-    ^
-    project
-      ^
-      task
-        ^
-        taskChange
-      note
-      attachment
-        ^
-        attachmentRev
-      appointment
-      effortEntry
-      
--- Later --      
-* Cross references in descr fields
-  !u: usr
-  !t: task
-  !f: attachment (file rev. as per tag date; file history relevant)
-  !l: attachemnt (latest rev.; current status relevant)
-  !a: appointment
-  
-* Calendar: day time table (per user), holidays (global + per user)
-   
-* Attendance: start & end, day balance (matched w/ effort entries), leaves (matched w/ capped project)
-   
--- Work plan --
-*1. actArea < actGrp < project tree view
-*2. project view [General+History Tasks Notes Appointments Attachments]
-*3. project < note tab
-4. project < task tab
-5. project < history 
-6. project < attachemnt
-7. project < appointments
-8. General TODO check; sp.: user check (assign & admin); form validations; data access permissions & validation; .js templates; test code
-9. calendar view 
-10. effort view + helpers (project, note, task, attachment, appointment)
-11. attendance (within calendar view)
-12. Cross references
-13. i18n (https://blog.novanet.no/creating-multilingual-support-using-angularjs/)
-14. Responsive layout
+ 
