@@ -9,7 +9,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		controller: 'projectViewCtrl'
 	});
 }])
-.controller('projectViewCtrl', ['$routeParams', '$scope', '$http', '$filter', function($routeParams, $scope, $http, $filter) {
+.controller('projectViewCtrl', ['$routeParams', '$scope', '$http', function($routeParams, $scope, $http) {
 		
 	// -- UI setup ---------------------------------------------------------------------------------------------------------------------------------------------
 	// TODO Check tabindex-based navigation (may be faulty because of tabs)	
@@ -42,6 +42,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	
 	// -- Scope initialization ---------------------------------------------------------------------------------------------------------------------------------
 	$scope.loadTabContent = function(tabId) {
+		
 		switch(tabId) {
 		case 'tab-notes':
 			// TODO Optimize view: maybe not all fields are required to be emitted as we're using &include_docs=true
@@ -49,11 +50,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 			$http.get($scope.objDataUrl).then(function(getResp) {
 				// TODO As global, note handling should be moved elsewhere
 				$scope.project.notes = [];
-				let projectNotesFromDb = [];
-				for(let i = 0; i<getResp.data.rows.length; i++) {
-					projectNotesFromDb.push(new VProjectNote(getResp.data.rows[i].doc));
-				}
-				$scope.project.notes = _.reverse(_.sortBy(projectNotesFromDb, ['date', 'summary'])); 
+				for(let i = 0; i<getResp.data.rows.length; i++)
+					$scope.project.notes.push(new VProjectNote(getResp.data.rows[i].doc));
+				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary'])); 
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -62,10 +61,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 			$scope.objDataUrl = `/_data/_design/project/_view/tasks-by-project?key="${$routeParams.projectId}"&include_docs=true`;
 			$http.get($scope.objDataUrl).then(function(getResp) {				
 				$scope.project.tasks = [];
-				let projectTasksFromDb = [];
-				for(let i = 0; i<getResp.data.rows.length; i++) {
-					projectTasksFromDb.push(new VProjectTask(getResp.data.rows[i].doc));
-				}
+				for(let i = 0; i<getResp.data.rows.length; i++)
+					$scope.project.tasks.push(new VProjectTask(getResp.data.rows[i].doc));
 				$scope.project.tasks = $scope.sortTasks(projectTasksFromDb); 
 				parayer.ui.showWait(false);
 			});
@@ -86,27 +83,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			// TODO Add input fields validation (see: https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples)
 			$scope.objDataUrl = `/_data/${$routeParams.projectId}`;
 			$http.get($scope.objDataUrl).then(function(respProject) {
-				$scope.project = {};
-				for(const key in respProject.data) {
-					if(key=='dateStart' || key=='dateEnd') {
-						if(respProject.data[key])
-							$scope.project[key] = new Date(respProject.data[key].substring(0, 4), 
-								respProject.data[key].substring(5, 7), 
-								respProject.data[key].substring(8, 10));
-					}
-					else if(key=='effortUnit' || key=='effortCap') {
-						if(respProject.data[key]) {
-							let today = new Date();
-							$scope.project[key] = new Date(today.getFullYear(), today.getMonth(), today.getDate());							
-							let effort = respProject.data[key].split(':');
-							$scope.project[key].setHours(effort[0]); 
-							$scope.project[key].setMinutes(effort[1]);
-							// TODO Strip seconds and millis
-						}
-					}
-					else
-						$scope.project[key] = respProject.data[key];
-				}
+				$scope.project = new VProject(respProject.data);
 				parayer.ui.setLocation(`Project :: ${$scope.project.name}`);
 				parayer.ui.showWait(false);
 			});
@@ -131,10 +108,37 @@ angular.module('parayer.projectView', ['ngRoute'])
 		}
 	};
 	
+	$scope.save = function() {
+		
+		let p = $scope.project;
+		// TODO Consider effortUnit and effortCap fields validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples
+		let r = new RegExp('[0-9]+:[0-5]{1}[0-9]{1}');
+		if(p.effortUnit.trim()!='' && !r.test(p.effortUnit)) {
+			parayer.ui.showSnackbar('Effort unit should be set as hours:minutes', 'warn');
+			return;
+		}
+		if(p.effortCap.trim()!='' && !r.test(p.effortCap)) {
+			parayer.ui.showSnackbar('Effort cap should be set as hours:minutes', 'warn');
+			return;
+		}
+		let dbObjUrl = `/_data/${p._id}`; 
+		$http.put(dbObjUrl, p.stringify()).then(function(putResp) {
+			if(putResp.status==200) {
+				if(putResp.data.ok){
+					p.refresh(putResp.data.rev);
+					history.back();
+				}
+				else // TODO Improve this message for (user-side) troubleshooting
+					parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
+			}
+			else
+				parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');			
+		});
+	}
+	
 	// -- Project NOTES management --
 	// TODO As global, note handling should be moved elsewhere	
 	// TODO User-selectable colours for notes would be fine!
-	// TODO It'd be nice to have /_data operations moved into VProjectNote class (but consider UI callback) 
 	$scope.updateNote = function(src) {
 
 		let n = src.note;
@@ -151,7 +155,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						n.refresh(putResp.data.rev);
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
 					}
-					else // TODO Improve this message for (user-level) troubleshooting
+					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
@@ -172,7 +176,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.notes.unshift(n);
 						// TODO Focus new note's summary input
 					}
-					else // TODO Improve this message for (user-level) troubleshooting
+					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`);
 				}
 				else
@@ -203,7 +207,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
 						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
-					else // TODO Improve this message for (user-level) troubleshooting
+					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`);
 				}
 				else
@@ -225,8 +229,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	}
 	
 	// -- Project TASKS management --
-	// TODO Improvemnet: second click on a chip should reverse the sort
-	// TODO It'd be nice to have /_data operations moved into VProjectTask class (but consider UI callback)
+	// TODO Improvement: second click on a chip should reverse the sort
 	$scope.setTaskSort = function(selected) {
 		
 		let sortChips = document.querySelectorAll('div.mdc-chip');
@@ -271,7 +274,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 					}
-					else // TODO Improve this message for (user-level) troubleshooting
+					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
@@ -293,7 +296,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						// TODO Focus new task's summary input
 					}
-					else // TODO Improve this message for (user-level) troubleshooting
+					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
@@ -324,7 +327,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						parayer.ui.showSnackbar('Task deleted!	', 'info');
 					}
-					else // TODO Improve this message for (user-level) troubleshooting
+					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`); 
 				}
 				else
@@ -361,9 +364,47 @@ angular.module('parayer.projectView', ['ngRoute'])
 	}
 	
 	// -- View objects -----------------------------------------------------------------------------------------------------------------------------------------
-	function VProject(d) {
+	class VProject {
 		
-		// TODO To be implemented
+		constructor(d) {
+			
+			this._id = d._id;
+			this._rev = d._rev;
+			this.type = d.type;
+			this.name = d.name;
+  			this.descr = d.descr;
+			this.usrAdminList = d.usrAdminList;
+			this.usrAssignList = d.usrAssignList;
+			this.actGrp = d.actGrp;
+			this.dateStart = d.dateStart!=''?new Date(Date.parse(d.dateStart)):null;
+			this.dateEnd = d.dateEnd!=''?new Date(Date.parse(d.dateEnd)):null;
+			this.effortUnit = d.effortUnit;
+			this.effortCap = d.effortCap;
+		}
+		
+		stringify() {
+		
+			 let o = {
+				"_id": this.i_id,
+				"_rev": this._rev,
+				"type": this.type,
+				"name": this.name,
+	  			"descr": this.descr,
+				"usrAdminList": this.usrAdminList,
+				"usrAssignList": this.usrAssignList,
+				"actGrp": this.actGrp,
+				"dateStart": this.dateStart!=null?this.dateStart.toISOString():'',
+				"dateEnd": this.dateEnd!=null?this.dateEnd.toISOString():'',
+				"effortUnit": this.effortUnit,
+	  			"effortCap": this.effortCap
+			}; 
+            return JSON.stringify(o);
+		}
+		
+		refresh(rev) {
+			
+			this._rev = rev;	
+		}
 	}
 	
 	class VProjectNote {
@@ -377,7 +418,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 				this.summary = d.summary; 
 				this.descr = d.descr;
 				this.usr = d.usr;
-				this.date = d.date != '' ? new Date(Date.parse(d.date)) : null;
+				this.date = d.date!=''?new Date(Date.parse(d.date)):null;
 				this.attachedTo = $scope.project._id;
 			}
 			else {
@@ -387,7 +428,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 				this.descr = '';
 				this.usr = parayer.auth.getUsrId();
 				this.date = new Date();
-				this.attachedTo = $scope.project._id;				
+				this.attachedTo = $scope.project._id;
 			}		
 		}
 		
@@ -425,7 +466,7 @@ angular.module('parayer.projectView', ['ngRoute'])
                 this.summary = d.summary;
                 this.descr = d.descr;
                 this.pc = `${d.pc}`;
-                this.dateDue = d.dateDue != '' ? new Date(Date.parse(d.dateDue)) : null;
+                this.dateDue = d.dateDue!=''?new Date(Date.parse(d.dateDue)):null;
                 this.created = {
                     "usr": d.created.usr,
                     "date": new Date(Date.parse(d.created.date))

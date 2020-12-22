@@ -18,6 +18,22 @@ div#decntnr-cntnr {
 	padding: 0.8em;
 }
 
+input#date-start {
+	width: 10em;
+}
+
+input#date-end {
+	width: 10em;
+}
+
+input#effort-unit {
+	width: 10em;
+}
+
+input#effort-cap {
+	width: 10em;
+}
+
 label#note-filter-text {
 	height: 2em;
 }

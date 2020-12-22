@@ -76,14 +76,14 @@
 				<label class="mdc-text-field mdc-text-field--filled" id="descr">
 					<span class="mdc-text-field__ripple"></span>
 					<span class="mdc-floating-label" id="descr-label">Description</span>
-					<input class="mdc-text-field__input" id="descr" type="text" value=" " ng-model="project.descr" aria-labelledby="descr-label" tabindex="102">
+					<input class="mdc-text-field__input" id="descr" type="text" value="{{project.descr!=''?' ':''}}" ng-model="project.descr" aria-labelledby="descr-label" tabindex="102">
 					<span class="mdc-line-ripple"></span>
 				</label>
 			</div>
 			<div class="deform">
-				<span class="properties">{{project.actGroup}} (TODO)</span><br>
-				<span class="properties">{{project.usrAdminList}} (TODO)</span><br>
-				<span class="properties">{{project.usrAssignList}} (TODO)</span><br>
+				<span class="properties">Act grp: {{project.actGrp}} (TODO)</span><br>
+				<span class="properties">Usr admin list: {{project.usrAdminList}} (TODO)</span><br>
+				<span class="properties">Usr assign list: {{project.usrAssignList}} (TODO)</span><br>
 			</div>
 			<div class="deform">
 				<label class="mdc-text-field mdc-text-field--filled" id="date-start">
@@ -103,23 +103,23 @@
 			<div class="deform">
 				<label class="mdc-text-field mdc-text-field--filled" id="effort-unit">
 					<span class="mdc-text-field__ripple"></span>
-					<span class="mdc-floating-label" id="effort-unit-label">Effort unit</span>
-					<input class="mdc-text-field__input" id="effort-unit" type="time" ng-model="project.effortUnit" aria-labelledby="effort-unit-label" 
-						tabindex="108">
+					<span class="mdc-floating-label" id="effort-unit-label">Effort unit (hours:minutes)</span>
+					<input class="mdc-text-field__input" id="effort-unit" value=" " ng-model="project.effortUnit" 
+						aria-labelledby="effort-unit-label" tabindex="108">
 					<span class="mdc-line-ripple"></span>
 				</label>&nbsp;<label class="mdc-text-field mdc-text-field--filled" id="effort-cap">
 					<span class="mdc-text-field__ripple"></span>
-					<span class="mdc-floating-label" id="effort-cap-label">Effort cap</span>
-					<input class="mdc-text-field__input" id="effort-cap" type="time" ng-model="project.effortCap" aria-labelledby="effort-cap-label" 
-						tabindex="109">
+					<span class="mdc-floating-label" id="effort-cap-label">Effort cap (hours:minutes)</span>
+					<input class="mdc-text-field__input" id="effort-cap" value=" " ng-model="project.effortCap" 
+						aria-labelledby="effort-cap-label" tabindex="109">
 					<span class="mdc-line-ripple"></span>
 				</label>
 			</div>			
 			<div class="deform">
-				<button class="mdc-button mdc-button--raised" id="submit" title="Ok!" tabindex="198" ng-click="save();">
+				<button type="submit" class="mdc-button mdc-button--raised" id="submit" title="Ok!" tabindex="198">
 			  		<span class="mdc-button__label">Save</span>
 				</button>
-				<button class="mdc-button mdc-button--outlined" id="cancel" title="Discard changes and go back" tabindex="199" onclick="window.history.back();">
+				<button class="mdc-button mdc-button--outlined" id="cancel" title="Discard changes and go back" tabindex="199" onclick="history.back();">
 			  		<span class="mdc-button__label">Cancel</span>
 				</button>
 			</div>
