@@ -63,7 +63,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 				$scope.project.tasks = [];
 				for(let i = 0; i<getResp.data.rows.length; i++)
 					$scope.project.tasks.push(new VProjectTask(getResp.data.rows[i].doc));
-				$scope.project.tasks = $scope.sortTasks(projectTasksFromDb); 
+				$scope.project.tasks = $scope.sortTasks($scope.project.tasks); 
 				parayer.ui.showWait(false);
 			});
 			break;
