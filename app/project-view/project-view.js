@@ -126,7 +126,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			if(putResp.status==200) {
 				if(putResp.data.ok){
 					p.refresh(putResp.data.rev);
-					history.back();
+					parayer.ui.goHome();
 				}
 				else // TODO Improve this message for (user-side) troubleshooting
 					parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 

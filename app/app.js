@@ -113,6 +113,13 @@ parayer.ui = {};	// -- UI management sub-namespace --
 		simpleConfirmDialog.open();
 	}
 	
+	// FIXME Method contract missing
+	context.goHome = function() {
+		
+		// TODO Currently inconditional redirect to activity grid, but maybe a finer logic would be fine
+		location.href='#!/act-grid';
+	}
+	
 })(parayer.ui);
 
 parayer.util = {};	// -- General utility sub-namespace --
