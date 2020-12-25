@@ -171,7 +171,7 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 					"type": "HistEntry",
 					"summary": summary,
 					"attachedTo": attachedTo,
-					"relatedTo": relatedTo,
+					"relatedTo": Array.isArray(relatedTo)?relatedTo:[],
 					"usr": parayer.auth.getUsrId(),
 					"timestamp": new Date()
 				});
