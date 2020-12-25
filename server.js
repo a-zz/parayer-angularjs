@@ -337,6 +337,9 @@ function dbSchemaValidation(couchDbQueryString, data) {
 	case 'Usr':
 		schemaFile += 'usr';
 		break;
+	case 'HistEntry':
+		schemaFile += 'history-entry';
+		break;
 	default:
 		throw `Schema validation failed: object type unknown or undefined for ${couchDbQueryString}`;
 	}	

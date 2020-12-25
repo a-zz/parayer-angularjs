@@ -50,7 +50,148 @@ parayer.date = {};	// -- Date-handling utilities sub-namespace --
 		}	
 		return week;
 	}
+	
+	// FIXME Method contract missing
+	// See: https://stackoverflow.com/a/6117889s
+	context.getWeekNumber = function(d) {
+	   	d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+	    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+	    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+	    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+	    return [d.getUTCFullYear(), weekNo];
+	}
+	
+	// FIXME Method contract missing
+	context.isToday = function(d) {
+		
+		return new Date().toLocaleDateString()==d.toLocaleDateString();			
+	}
+	
+	// FIXME Method contract missing
+	context.isYesterday = function(d) {
+		
+		let y = new Date(); 
+		y.setDate(new Date().getDate()-1);
+		return y.toLocaleDateString()==d.toLocaleDateString();
+	}
+	
+	// FIXME Method contract missing
+	context.isThisWeek = function(d) {
+		
+		let tw = parayer.date.getWeekNumber(new Date());
+		let dw = parayer.date.getWeekNumber(d);
+		return tw[0]==dw[0] && tw[1]==dw[1];
+	}	
+	
+	// FIXME Method contract missing
+	context.isLastWeek = function(d) {
+		
+		let tw = parayer.date.getWeekNumber(new Date());
+		let dw = parayer.date.getWeekNumber(d);
+		return (tw[0]==dw[0] && tw[1]==dw[1]+1) || (tw[0]==dw[0]+1 && tw[1]==1);   
+	}
+	
+	// FIXME Method contract missing
+	context.isThisMonth = function(d) {
+		
+		let tm1 = new Date(); tm1.setDate(1); tm1.setHours(0); tm1.setMinutes(0); tm1.setSeconds(0);
+		let dm1 = new Date(d.getFullYear(), d.getMonth(), 1);
+		
+		return tm1.toLocaleDateString()==dm1.toLocaleDateString();
+	}
+	
+	// FIXME Method contract missing
+	context.isLastMonth = function(d) {
+		
+		let lm1;
+		let t = new Date();
+		if(d.getMonth()>0)
+			lm1 = new Date(t.getFullYear(), t.getMonth()-1, 1);
+		else
+		 	lm1 = new Date(t.getFullYear()-1, 11, 1);
+		lm1.setHours(0); lm1.setMinutes(0); lm1.setSeconds(0);
+		let dm1 = new Date(d.getFullYear(), d.getMonth(), 1); 
+		return lm1.toLocaleDateString()==dm1.toLocaleDateString();
+	}
 })(parayer.date);
+
+parayer.history = {};	// -- App-wide history management sub-namespace --
+(function(context) {
+	
+	// FIXME Method contract missing
+	class VHistEntry {
+		
+		constructor(d) {
+			
+			this._id = d._id;
+			this._rev = d._rev;
+			this.type = 'HistEntry';
+			this.summary = d.summary;
+			this.attachedTo = d.attachedTo;
+			this.relatedTo = d.relatedTo;
+			this.usr = d.usr;
+			this.timestamp = new Date(Date.parse(d.timestamp)); 
+		}
+		
+		stringify() {
+			
+			let o = {
+				"_id": this._id,
+				"_rev_": this._rev,
+				"type": 'HistEntry',
+				"summary": this.summary,
+				"attachedTo": this.attachedTo,
+				"relatedTo": this.relatedTo,
+				"usr": this.usr,
+				"timestamp": this.timestamp.toISOString()
+			};
+			return JSON.stringify(o);
+		}
+	}
+	
+	// FIXME Method contract missing
+	context.getFor = function(objectId, $http, callback) {
+		
+		let objDataUrl = `/_data/_design/global-scope/_view/history-for?key="${objectId}"&include_docs=true`;
+		$http.get(objDataUrl).then(function(getResp) {				
+			let r = [];
+			for(let i = 0; i<getResp.data.rows.length; i++)
+				r.push(new VHistEntry(getResp.data.rows[i].doc));
+			callback(_.reverse(_.sortBy(r, ['timestamp']))); 
+		});
+	}
+	
+	// FIXME Method contract missing
+	context.make = function(summary, attachedTo, relatedTo, aggregate, $http) {
+		
+		if(!aggregate) {
+			$http.get('/_uuid').then(function(respUuid) {
+				let e = new VHistEntry({
+					"_id": respUuid.data.uuid,	
+					"type": "HistEntry",
+					"summary": summary,
+					"attachedTo": attachedTo,
+					"relatedTo": relatedTo,
+					"usr": parayer.auth.getUsrId(),
+					"timestamp": new Date()
+				});
+				let dbObjUrl = `/_data/${e._id}`;	
+				$http.put(dbObjUrl, e.stringify()).then(function(putResp) {
+					if(putResp.status==200) {
+						if(!putResp.data.ok) // TODO Improve this message for (user-side) troubleshooting
+							parayer.ui.showSnackbar(`History saving failed! ${putResp.data.reason}`);
+					 } 
+					else
+						parayer.ui.showSnackbar('History saving failed! Contact your system admin', 'error');
+						
+				});
+			});
+		}
+		else {
+			console.log('To be implemented!');	
+		}
+	}
+})(parayer.history);
 
 parayer.ui = {};	// -- UI management sub-namespace --
 (function(context) {

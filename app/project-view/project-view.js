@@ -76,7 +76,69 @@ angular.module('parayer.projectView', ['ngRoute'])
 			parayer.ui.showWait(false);
 			break;
 		case 'tab-history':
-			console.log('TODO To be implemented');
+			parayer.history.getFor($scope.project._id, $http, function(h) {
+				$scope.project.history = h;
+				// Compute date filters available
+				let filtersAdded = [];
+				$scope.historyDateFilterOptions = [];  
+				$scope.historyDateFilterOptions.push({"value": "", "text": "At any time", order: 999})
+				for(let i = 0; i<$scope.project.history.length; i++) {
+					let entry = $scope.project.history[i];
+					entry.dateFilterLabels = [];
+					if(parayer.date.isToday(entry.timestamp)) {
+						entry.dateFilterLabels.push('today');
+						if(filtersAdded.indexOf('today')==-1) {
+							filtersAdded.push('today');
+							$scope.historyDateFilterOptions.push({"value": "today", "text": "Today", order: 0});
+						}
+					}
+					if(parayer.date.isYesterday(entry.timestamp)) {
+						entry.dateFilterLabels.push('yesterday');
+						if(filtersAdded.indexOf('yesterday')==-1) {
+							filtersAdded.push('yesterday');
+							$scope.historyDateFilterOptions.push({"value": "yesterday", "text": "Yesterday", order: -1});
+						}
+					}
+					if(parayer.date.isThisWeek(entry.timestamp)) {
+						entry.dateFilterLabels.push('thisweek');
+						if(filtersAdded.indexOf('thisweek')==-1) {
+							filtersAdded.push('thisweek');
+							$scope.historyDateFilterOptions.push({"value": "thisweek", "text": "This week", order: -7});
+						}
+					}
+					if(parayer.date.isLastWeek(entry.timestamp)) {
+						entry.dateFilterLabels.push('lastweek');
+						if(filtersAdded.indexOf('lastweek')==-1) {
+							filtersAdded.push('lastweek');
+							$scope.historyDateFilterOptions.push({"value": "lastweek", "text": "Last week", order: -14});
+						}
+					}
+					if(parayer.date.isThisMonth(entry.timestamp)) {
+						entry.dateFilterLabels.push('thismonth');
+						if(filtersAdded.indexOf('thismonth')==-1) {
+							filtersAdded.push('thismonth');
+							$scope.historyDateFilterOptions.push({"value": "thismonth", "text": "This month", order: -30});
+						}
+					}
+					if(parayer.date.isLastMonth(entry.timestamp)) {
+						entry.dateFilterLabels.push('lastmonth');
+						if(filtersAdded.indexOf('lastmonth')==-1) {
+							filtersAdded.push('lastmonth');
+							$scope.historyDateFilterOptions.push({"value": "lastmonth", "text": "Last month", order: -60});
+						}
+					}
+					if(entry.dateFilterLabels.length==0) { 
+						let label = `${entry.timestamp.getFullYear()}-${String(entry.timestamp.getMonth()+1).padStart(2, '0')}`;
+						entry.dateFilterLabels.push(label);
+						if(filtersAdded.indexOf(label)==-1) {
+							filtersAdded.push(label);
+							// TODO "year-month" in current locale needed for text field
+							$scope.historyDateFilterOptions.push({"value": label, "text": label, order: -90});
+						}
+					}
+				}
+				$scope.historyDateFilterOptions = _.reverse(_.sortBy($scope.historyDateFilterOptions, ['order', 'value']));
+			});
 			parayer.ui.showWait(false);
 			break;
 		default:
@@ -154,6 +216,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					if(putResp.data.ok) {						
 						n.refresh(putResp.data.rev);
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
+						parayer.history.make(`Updated note "${n.summary}"`, $scope.project._id, [n._id], false, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -175,6 +238,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						n.refresh(putResp.data.rev);
 						$scope.project.notes.unshift(n);
 						// TODO Focus new note's summary input
+						parayer.history.make(`Added a new note`, $scope.project._id, [n._id], false, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`);
@@ -205,6 +269,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
+						parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, null, false, $http);
 						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
@@ -273,6 +338,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					if(putResp.data.ok) {						
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+						parayer.history.make(`Updated task "${t.summary}"`, $scope.project._id, [t._id], false, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -295,6 +361,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.tasks.unshift(t);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						// TODO Focus new task's summary input
+						parayer.history.make(`Added a new task`, $scope.project._id, [t._id], false, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -325,6 +392,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+						parayer.history.make(`Deleted task "${t.summary}"`, $scope.project._id, null, false, $http);
 						parayer.ui.showSnackbar('Task deleted!	', 'info');
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
@@ -360,6 +428,26 @@ angular.module('parayer.projectView', ['ngRoute'])
 				taskCntnr.style.display = '';
 			else
 				taskCntnr.style.display = 'none';
+		}
+	}
+	
+	// -- Project FILES management --
+	// TODO To be implemented
+	
+	// -- Project APPOINTMENTS management --
+	// TODO To be implemented
+	
+	// -- Project HISTORY tab --
+	$scope.filterHistory = function(src) {
+		
+		let filter = document.getElementById('history-filter-date-select').value;
+		for(let i = 0; i<$scope.project.history.length; i++) {
+			let entryCntnr = document.getElementById(`project-hist-entry-${$scope.project.history[i]._id}`);
+			if($scope.project.history[i].summary.toUpperCase().indexOf($scope.historyFilterText.toUpperCase())!=-1 &&
+				(filter=='' || $scope.project.history[i].dateFilterLabels.indexOf(filter)!=-1))
+				entryCntnr.style.display = '';
+			else
+				entryCntnr.style.display = 'none';
 		}
 	}
 	

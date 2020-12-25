@@ -93,4 +93,13 @@ span.task-meta {
 	font-size: 90%;
 	font-style: italic;
 }
+
+div.hist-entry-cntnr {
+	margin: 1em;
+	padding: 0.5em;
+}
+
+select#history-filter-date-select {
+	width: 15em;
+}
 /* ************************************************************************** */

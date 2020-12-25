@@ -315,5 +315,35 @@
 	
 	<div class="detab" id="tab-appointments-decntnr">[Appointments]</div>
 	
-	<div class="detab" id="tab-history-decntnr">[History]</div>
+	<div class="detab" id="tab-history-decntnr">
+		<div class="detab-control-cntnr">
+			<div class="detab-control-cntnr-left">
+				Found {{project.history.length}} entries&nbsp;
+			</div>
+			<div class="detab-control-cntnr-right">
+				<span class="material-icons">search</span>
+				<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label" id="note-filter-text">
+					<span class="mdc-notched-outline">
+						<span class="mdc-notched-outline__leading"></span>
+						<span class="mdc-notched-outline__trailing"></span>
+					</span>
+  					<input type="text" class="mdc-text-field__input" id="history-filter-text-input" aria-label="Filter history by..." 
+  						placeholder="Filter history by..." ng-model="historyFilterText" ng-change="filterHistory();">&nbsp;
+  					<select class="mdc-text-field" id="history-filter-date-select" ng-click="filterHistory(this);">
+  						<option ng-repeat="filter in historyDateFilterOptions" value="{{filter.value}}">{{filter.text}}</option>
+  					</select>
+				</label>
+			</div>
+		</div>
+		<br>
+		<div class="detab-list-cntnr">
+			<div class="mdc-card hist-entry-cntnr" ng-repeat="entry in project.history" id="project-hist-entry-{{entry._id}}">
+	  			<div class="mdc-card__primary-action">
+					<span id="project-hist-entry-{{entry._id}}-summary" class="hist-entry-summary">
+						"{{entry.usr}}" (TODO) {{entry.summary}} at {{entry.timestamp.toLocaleString()}}
+					</span>
+	  			</div>
+			</div>
+		</div>
+	</div>
 </div>
