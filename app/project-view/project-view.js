@@ -443,7 +443,8 @@ angular.module('parayer.projectView', ['ngRoute'])
 		let filter = document.getElementById('history-filter-date-select').value;
 		for(let i = 0; i<$scope.project.history.length; i++) {
 			let entryCntnr = document.getElementById(`project-hist-entry-${$scope.project.history[i]._id}`);
-			if($scope.project.history[i].summary.toUpperCase().indexOf($scope.historyFilterText.toUpperCase())!=-1 &&
+			let textFilter = $scope.historyFilterText!=''?$scope.historyFilterText.toUpperCase():'';
+			if($scope.project.history[i].summary.toUpperCase().indexOf(textFilter)!=-1 &&
 				(filter=='' || $scope.project.history[i].dateFilterLabels.indexOf(filter)!=-1))
 				entryCntnr.style.display = '';
 			else
