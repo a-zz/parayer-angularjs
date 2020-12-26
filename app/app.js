@@ -150,15 +150,18 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 	}
 	
 	// FIXME Method contract missing
-	context.getFor = function(objectId, $http, callback) {
+	context.getFor = function(objectId, $http) {
 		
-		let objDataUrl = `/_data/_design/global-scope/_view/history-for?key="${objectId}"&include_docs=true`;
-		$http.get(objDataUrl).then(function(getResp) {				
-			let r = [];
-			for(let i = 0; i<getResp.data.rows.length; i++)
-				r.push(new VHistEntry(getResp.data.rows[i].doc));
-			callback(_.reverse(_.sortBy(r, ['timestamp']))); 
+		let p = new Promise(function (resolve, reject) {
+			let objDataUrl = `/_data/_design/global-scope/_view/history-for?key="${objectId}"&include_docs=true`;
+			$http.get(objDataUrl).then(function(getResp) {				
+				let r = [];
+				for(let i = 0; i<getResp.data.rows.length; i++)
+					r.push(new VHistEntry(getResp.data.rows[i].doc));
+				resolve(_.reverse(_.sortBy(r, ['timestamp']))); 
+			});
 		});
+		return p;
 	}
 	
 	// FIXME Method contract missing
