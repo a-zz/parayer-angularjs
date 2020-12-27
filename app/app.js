@@ -54,11 +54,20 @@ parayer.date = {};	// -- Date-handling utilities sub-namespace --
 	// FIXME Method contract missing
 	// See: https://stackoverflow.com/a/6117889s
 	context.getWeekNumber = function(d) {
-	   	d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+	   	
+		d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 	    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
 	    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
 	    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
 	    return [d.getUTCFullYear(), weekNo];
+	}
+	
+	// FIXME Method contract missing
+	context.diff = function(d1, d2) {
+		
+		let u1 = Date.UTC(d1.getYear(), d1.getMonth(), d1.getDate(), d1.getHours(), d1.getMinutes(), d1.getSeconds(), d1.getMilliseconds());
+		let u2 = Date.UTC(d2.getYear(), d2.getMonth(), d2.getDate(), d2.getHours(), d2.getMinutes(), d2.getSeconds(), d2.getMilliseconds());
+		return d1-d2;
 	}
 	
 	// FIXME Method contract missing
@@ -167,7 +176,7 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 	// FIXME Method contract missing
 	context.make = function(summary, attachedTo, relatedTo, aggregate, $http) {
 		
-		if(!aggregate) {
+		if(aggregate==null) {
 			$http.get('/_uuid').then(function(respUuid) {
 				let e = new VHistEntry({
 					"_id": respUuid.data.uuid,	
@@ -191,7 +200,25 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 			});
 		}
 		else {
-			console.log('To be implemented!');	
+			parayer.history.getFor(attachedTo, $http).then(function(h) {
+				h = _.filter(h, { "usr": parayer.auth.getUsrId(), "relatedTo": relatedTo });
+				let now = new Date();
+				h = _.filter(h, function(o) { 
+					// TODO Compute time difference in millis
+					return parayer.date.diff(now, o.timestamp) <= aggregate;					
+				 });
+				if(h.length==0) //Can't aggregate, new entry
+					parayer.history.make(summary, attachedTo, relatedTo, null, $http);
+				else {
+					h = _.sortBy(h, ['timestamp']);
+					// TODO Improve summary on aggregation (figure out how)
+					parayer.history.make(`${h[0].summary}`, attachedTo, relatedTo, null, $http);
+					for(let i = 0; i<h.length; i++) {
+						let dbObjUrl = `/_data/${h[i]._id}`;
+						$http.delete(`${dbObjUrl}?rev=${h[i]._rev}`);
+					}
+				}
+			});	
 		}
 	}
 })(parayer.history);

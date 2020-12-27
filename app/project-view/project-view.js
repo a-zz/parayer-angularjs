@@ -158,7 +158,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					if(putResp.data.ok) {						
 						n.refresh(putResp.data.rev);
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
-						parayer.history.make(`Updated note "${n.summary}"`, $scope.project._id, [n._id], false, $http);
+						parayer.history.make(`Updated note "${n.summary}"`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -180,7 +180,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						n.refresh(putResp.data.rev);
 						$scope.project.notes.unshift(n);
 						// TODO Focus new note's summary input
-						parayer.history.make(`Added a new note`, $scope.project._id, [n._id], false, $http);
+						parayer.history.make(`Added a new note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`);
@@ -211,7 +211,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
-						parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, null, false, $http);
+						parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, 60 * 60 * 1000, false, $http);
 						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
@@ -237,6 +237,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	
 	// -- Project TASKS management --
 	// TODO Improvement: second click on a chip should reverse the sort
+	// TODO Keep sort and text filter on tab focus
 	$scope.setTaskSort = function(selected) {
 		
 		let sortChips = document.querySelectorAll('div.mdc-chip');
@@ -263,6 +264,18 @@ angular.module('parayer.projectView', ['ngRoute'])
 		else
 			return _.reverse(_.sortBy(src, [sortBy]));
 	}
+	
+	$scope.filterTasksByText = function(src) {
+		
+		for(let i = 0; i<$scope.project.tasks.length; i++) {
+			let taskCntnr = document.getElementById(`project-task-${$scope.project.tasks[i]._id}`);
+			if($scope.project.tasks[i].summary.toUpperCase().indexOf($scope.taskFilterText.toUpperCase())!=-1 || 
+				$scope.project.tasks[i].descr.toUpperCase().indexOf($scope.taskFilterText.toUpperCase())!=-1)
+				taskCntnr.style.display = '';
+			else
+				taskCntnr.style.display = 'none';
+		}
+	}	
 		
 	$scope.updateTask = function(src) {
 	
@@ -280,7 +293,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					if(putResp.data.ok) {						
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-						parayer.history.make(`Updated task "${t.summary}"`, $scope.project._id, [t._id], false, $http);
+						parayer.history.make(`Updated task "${t.summary}"`, $scope.project._id, [t._id], 60 * 60 * 1000, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -303,7 +316,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.tasks.unshift(t);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						// TODO Focus new task's summary input
-						parayer.history.make(`Added a new task`, $scope.project._id, [t._id], false, $http);
+						parayer.history.make(`Added a new task`, $scope.project._id, [t._id], 60 * 60 * 1000, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -334,7 +347,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-						parayer.history.make(`Deleted task "${t.summary}"`, $scope.project._id, null, false, $http);
+						parayer.history.make(`Deleted task "${t.summary}"`, $scope.project._id, null, 60 * 60 * 1000, $http);
 						parayer.ui.showSnackbar('Task deleted!	', 'info');
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
@@ -358,18 +371,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 				if(task.pc==100)
 					$scope.deleteTask({"task": task}, true);
 			});
-		}
-	}
-	
-	$scope.filterTasksByText = function(src) {
-		
-		for(let i = 0; i<$scope.project.tasks.length; i++) {
-			let taskCntnr = document.getElementById(`project-task-${$scope.project.tasks[i]._id}`);
-			if($scope.project.tasks[i].summary.toUpperCase().indexOf($scope.taskFilterText.toUpperCase())!=-1 || 
-				$scope.project.tasks[i].descr.toUpperCase().indexOf($scope.taskFilterText.toUpperCase())!=-1)
-				taskCntnr.style.display = '';
-			else
-				taskCntnr.style.display = 'none';
 		}
 	}
 	
