@@ -95,6 +95,8 @@ span.task-meta {
 }
 
 div.hist-entry-cntnr {
+	display: inline-block;
+	width: 98%;
 	margin: 1em;
 	padding: 0.5em;
 }

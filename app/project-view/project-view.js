@@ -143,6 +143,18 @@ angular.module('parayer.projectView', ['ngRoute'])
 	// -- Project NOTES management --
 	// TODO As global, note handling should be moved elsewhere	
 	// TODO User-selectable colours for notes would be fine!
+	$scope.filterNotesByText = function(src) {
+		
+		for(let i = 0; i<$scope.project.notes.length; i++) {
+			let noteCntnr = document.getElementById(`project-note-${$scope.project.notes[i]._id}`);
+			if($scope.project.notes[i].summary.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1 || 
+				$scope.project.notes[i].descr.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1)
+				noteCntnr.style.display = '';
+			else
+				noteCntnr.style.display = 'none';
+		}
+	}	
+	
 	$scope.updateNote = function(src) {
 
 		let n = src.note;
@@ -158,7 +170,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					if(putResp.data.ok) {						
 						n.refresh(putResp.data.rev);
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
-						parayer.history.make(`Updated note "${n.summary}"`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
+						parayer.history.make(`Updated note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -211,7 +223,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
-						parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, 60 * 60 * 1000, false, $http);
+						parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, null, null, $http);
 						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
@@ -220,18 +232,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 				else
 					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
 			});
-		}
-	}
-	
-	$scope.filterNotesByText = function(src) {
-		
-		for(let i = 0; i<$scope.project.notes.length; i++) {
-			let noteCntnr = document.getElementById(`project-note-${$scope.project.notes[i]._id}`);
-			if($scope.project.notes[i].summary.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1 || 
-				$scope.project.notes[i].descr.toUpperCase().indexOf($scope.noteFilterText.toUpperCase())!=-1)
-				noteCntnr.style.display = '';
-			else
-				noteCntnr.style.display = 'none';
 		}
 	}
 	
@@ -293,7 +293,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					if(putResp.data.ok) {						
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-						parayer.history.make(`Updated task "${t.summary}"`, $scope.project._id, [t._id], 60 * 60 * 1000, $http);
+						parayer.history.make(`Updated task`, $scope.project._id, [t._id], 60 * 60 * 1000, $http);
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -347,7 +347,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 								break;
 							}
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-						parayer.history.make(`Deleted task "${t.summary}"`, $scope.project._id, null, 60 * 60 * 1000, $http);
+						parayer.history.make(`Deleted task "${t.summary}"`, $scope.project._id, null, null, $http);
 						parayer.ui.showSnackbar('Task deleted!	', 'info');
 					}
 					else // TODO Improve this message for (user-side) troubleshooting

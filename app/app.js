@@ -67,7 +67,7 @@ parayer.date = {};	// -- Date-handling utilities sub-namespace --
 		
 		let u1 = Date.UTC(d1.getYear(), d1.getMonth(), d1.getDate(), d1.getHours(), d1.getMinutes(), d1.getSeconds(), d1.getMilliseconds());
 		let u2 = Date.UTC(d2.getYear(), d2.getMonth(), d2.getDate(), d2.getHours(), d2.getMinutes(), d2.getSeconds(), d2.getMilliseconds());
-		return d1-d2;
+		return u1-u2;
 	}
 	
 	// FIXME Method contract missing
