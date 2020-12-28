@@ -202,6 +202,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.notes.unshift(n);
 						// TODO Focus new note's summary input
 						parayer.history.make(`Added a new note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
+						$scope.$$postDigest(function() {
+							parayer.refchips.fillInAll($http);
+						});
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`);
@@ -303,6 +306,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						parayer.history.make(`Updated task`, $scope.project._id, [t._id], 60 * 60 * 1000, $http);
+						$scope.$$postDigest(function() {
+							parayer.refchips.fillInAll($http);
+						});
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
@@ -326,6 +332,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 						// TODO Focus new task's summary input
 						parayer.history.make(`Added a new task`, $scope.project._id, [t._id], 60 * 60 * 1000, $http);
+						$scope.$$postDigest(function() {
+							parayer.refchips.fillInAll($http);
+						});
 					}
 					else // TODO Improve this message for (user-side) troubleshooting
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
