@@ -377,6 +377,12 @@ parayer.ui = {};	// -- UI management sub-namespace --
 		location.href='#!/act-grid';
 	}
 	
+	// FIXME Method contract missing
+	context.txtFitContents = function(t) {
+		
+		t.style.height = '1px'; 
+		t.style.height = (25 + t.scrollHeight) + 'px';
+	}
 })(parayer.ui);
 
 parayer.util = {};	// -- General utility sub-namespace --

@@ -152,7 +152,7 @@
 					<input id="project-note-{{note._id}}-summary" class="note-summary" value="{{note.summary}}" placeholder="Note summary"
 						ng-model="note.summary" ng-change="note.changed=true;" ng-blur="updateNote(this);"/>
 					<br>
-					<textarea id="project-note-{{note._id}}-descr" class="note-descr"					
+					<textarea id="project-note-{{note._id}}-descr" class="note-descr" onkeyup="parayer.ui.txtFitContents(this);"					
 						ng-model="note.descr" ng-change="note.changed=true;" ng-blur="updateNote(this);">
 						{{note.descr}}
 					</textarea>	
@@ -291,7 +291,7 @@
 						</div>
 	  				</div>					
 					<br>
-					<textarea id="project-task-{{task._id}}-descr" class="task-descr"					
+					<textarea id="project-task-{{task._id}}-descr" class="task-descr" onkeyup="parayer.ui.txtFitContents(this);"				
 						ng-readonly="task.pc=='100'" ng-model="task.descr" ng-change="task.changed=true;" ng-blur="updateTask(this);">
 						{{task.descr}}
 					</textarea>	

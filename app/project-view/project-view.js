@@ -55,6 +55,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
 				$scope.$$postDigest(function() {
 					parayer.refchips.fillInAll($http);
+					_.forEach(document.querySelectorAll('textarea.note-descr'), function(t) {
+						parayer.ui.txtFitContents(t);
+					});	
 				});
 				parayer.ui.showWait(false);
 			});
@@ -69,6 +72,9 @@ angular.module('parayer.projectView', ['ngRoute'])
 				$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 				$scope.$$postDigest(function() {
 					parayer.refchips.fillInAll($http);
+					_.forEach(document.querySelectorAll('textarea.task-descr'), function(t) {
+						parayer.ui.txtFitContents(t);
+					});
 				});
 				parayer.ui.showWait(false);
 			});
@@ -151,7 +157,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	
 	// -- Project NOTES management --
 	// TODO As global, note handling should be moved elsewhere	
-	// TODO User-selectable colours for notes would be fine!
+	// TODO User-selectable colours for notes would be fine!	
 	$scope.filterNotesByText = function(src) {
 		
 		for(let i = 0; i<$scope.project.notes.length; i++) {
@@ -250,6 +256,14 @@ angular.module('parayer.projectView', ['ngRoute'])
 	// -- Project TASKS management --
 	// TODO Improvement: second click on a chip should reverse the sort
 	// TODO Keep sort and text filter on tab focus
+	$scope.tasksFitContents = function() {
+		
+		_.forEach(document.querySelectorAll('textarea.task-descr'), function(t) {
+			t.style.height = '1px'; 
+			t.style.height = (25 + t.scrollHeight) + 'px';
+		});
+	}
+	
 	$scope.setTaskSort = function(selected) {
 		
 		let sortChips = document.querySelectorAll('div.mdc-chip');
