@@ -36,7 +36,7 @@ else {
 	_server_.get('/_usrauth', function(req, res) {
 		
 		_log_.info('User authentication request ' + req.url + ': to be implemented!');
-	    res.send('User authentication request ' + req.url + ': to be implemented!');
+		res.send('User authentication request ' + req.url + ': to be implemented!');
 	});
 
 	/* Data requests (to be redirected to CouchDB server) */
@@ -48,14 +48,14 @@ else {
 		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
 		_log_.info(`db GET request to ${couchdbQueryString}`); 
 		let httpOptions = {
-	    	host: _config_.couchDb.host,
-	    	port: _config_.couchDb.port,
-	    	path: '/' + _config_.couchDb.db + couchdbQueryString,
-	    	method: 'GET',
+			host: _config_.couchDb.host,
+			port: _config_.couchDb.port,
+			path: '/' + _config_.couchDb.db + couchdbQueryString,
+			method: 'GET',
 			headers: {
 				'authorization': _config_.couchDb.authHeader
 			}
-	  	};
+		};
 		let httpReq = __http__.request(httpOptions, function(httpResp) {
 			
 			let httpRespData = '';
@@ -64,24 +64,27 @@ else {
 				httpRespData += chunk;
 			});
 		    httpResp.on('end', function() {
-				// TODO Parse httpRespData for error messages, log accordingly
-				_log_.trace('db returned '+ httpRespData);
-				if(_config_.couchDb.strict && couchdbQueryString.indexOf('_view')==-1) { 
-					try {
+				if(JSON.parse(httpRespData).error) {
+					_log_.warn(`db GET request ${couchdbQueryString}: ${httpRespData}`);
+					res.send(httpRespData);
+					return;
+				}
+				else if(_config_.couchDb.strict && couchdbQueryString.indexOf('_view')==-1) { 
+					try {						
 						dbSchemaValidation(couchdbQueryString, httpRespData);
 					}
 					catch(e) {
 						_log_.error(e);
 						return;
 					}
-	    		}
+				}
 				res.send(httpRespData);
-	    	})
-	  	}).on("error", function(err) {
-	  		_log_.error(`db GET request ${couchdbQueryString}: ${err.message}`);
+			})
+		}).on("error", function(err) {
+			_log_.error(`db GET request ${couchdbQueryString}: ${err.message}`);
 			res.send(err.message);
 		});
-	    httpReq.end();
+		httpReq.end();
 	});
 	
 	_server_.put(dbRequestPrefix + '/*', function(req, res) {
@@ -89,8 +92,8 @@ else {
 		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
 		_log_.info(`db PUT request to ${couchdbQueryString}`);		
 		let putData = JSON.stringify(req.body).replace(/[^\0-~]/g, function(ch) {
-	        return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
-	    });
+			return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
+		});
 		try {
 			dbSchemaValidation(couchdbQueryString, putData);
 		}
@@ -100,35 +103,35 @@ else {
 		}
 		
 		let httpOptions = {
-	    	host: _config_.couchDb.host,
-	    	port: _config_.couchDb.port,
-	    	path: '/' + _config_.couchDb.db + couchdbQueryString,
-	    	method: 'PUT',
+			host: _config_.couchDb.host,
+			port: _config_.couchDb.port,
+			path: '/' + _config_.couchDb.db + couchdbQueryString,
+			method: 'PUT',
 			headers: {
 				'authorization': _config_.couchDb.authHeader,
 				'Content-Type': 'application/json; charset=utf-8',
-	    		'Content-Length': putData.length
+				'Content-Length': putData.length
 			}
-	  	};
+		};
 		let httpReq = __http__.request(httpOptions, function(httpResp) {
 			
 			let httpRespData = '';
-	    	httpResp.setEncoding('utf8');
+			httpResp.setEncoding('utf8');
 			httpResp.on('data', function(chunk) {
 				httpRespData += chunk;
 			});
-		    httpResp.on('end', function() {
+			httpResp.on('end', function() {
 				// TODO Parse httpRespData for error messages, log accordingly
-	      		_log_.debug(`db PUT request to ${couchdbQueryString} : (data: ${putData})`);
+				_log_.debug(`db PUT request to ${couchdbQueryString} : (data: ${putData})`);
 				_log_.trace('db returned '+ httpRespData);
-	    		res.send(httpRespData);
-	    	})
-	  	}).on("error", function(err) {
-	  		_log_.error('db PUT request ' + couchdbQueryString + ': ' + err.message);
+				res.send(httpRespData);
+			})
+		}).on("error", function(err) {
+			_log_.error('db PUT request ' + couchdbQueryString + ': ' + err.message);
 			res.send(err.message);
 		});
 		httpReq.write(putData);
-	    httpReq.end();
+		httpReq.end();
 	});
 	
 	_server_.delete(dbRequestPrefix + '/*', function(req, res) {
@@ -138,32 +141,32 @@ else {
 		let couchdbQueryString = req.url.substring(dbRequestPrefix.length);
 		_log_.info(`db DELETE request to ${couchdbQueryString}`); 
 		let httpOptions = {
-	    	host: _config_.couchDb.host,
-	    	port: _config_.couchDb.port,
-	    	path: '/' + _config_.couchDb.db + couchdbQueryString,
-	    	method: 'DELETE',
+			host: _config_.couchDb.host,
+			port: _config_.couchDb.port,
+			path: '/' + _config_.couchDb.db + couchdbQueryString,
+			method: 'DELETE',
 			headers: {
 				'authorization': _config_.couchDb.authHeader
 			}
-	  	};
+		};
 		let httpReq = __http__.request(httpOptions, function(httpResp) {
 			
 			let httpRespData = '';
-	    	httpResp.setEncoding('utf8');
+			httpResp.setEncoding('utf8');
 			httpResp.on('data', function(chunk) {
 				httpRespData += chunk;
 			});
-		    httpResp.on('end', function() {
+			httpResp.on('end', function() {
 				// TODO Parse httpRespData for error messages, log accordingly
 				_log_.trace('db returned '+ httpRespData);
 				res.send(httpRespData);
-	    	})
-	  	}).on("error", function(err) {
-	  		_log_.error(`db DELETE request ${couchdbQueryString}: ${err.message}`);
+			})
+		}).on("error", function(err) {
+			_log_.error(`db DELETE request ${couchdbQueryString}: ${err.message}`);
 			res.send(err.message);
 		});
-	    httpReq.end();
-	});	
+		httpReq.end();
+	});
 	
 	/* UUID generation service */
 	_server_.get('/_uuid', function(req, res) {
@@ -176,7 +179,7 @@ else {
 	/* Test service */ 
 	_server_.get('/_test', function(req, res) {
 		
-	    res.send({'message': 'It works! :)', 'version': _appVer_ });
+		res.send({'message': 'It works! :)', 'version': _appVer_ });
 	});
 }
 

@@ -239,12 +239,15 @@ parayer.refchips = {};
 				parayer.refchips.fillIn(chip, cached.data);
 			else {
 				let dbObjUrl = `/_data/${chip.id}`;
-				$http.get(dbObjUrl).then(function(getResp) {
+				$http.get(dbObjUrl).then(function(getResp) {					
 					if(getResp.status==200)
-						if(getResp.statusText=="OK") {
-							parayer.refchips.fillIn(chip, getResp.data);
-							parayer.refchips.cacheIn(getResp.data);
-						}
+						if(getResp.statusText=="OK")
+							if(!getResp.data.error) {
+								parayer.refchips.fillIn(chip, getResp.data);
+								parayer.refchips.cacheIn(getResp.data);
+							}
+						else
+							parayer.refchips.fillIn(chip, { "type": "error", "reason": `(${getResp.data.reason})` });
 				});
 			}
 		});
@@ -296,6 +299,9 @@ parayer.refchips = {};
 		case "Note":
 		case "ProjectTask":
 			chip.innerHTML = data.summary;
+			break;
+		case "error":
+			chip.innerHTML = data.reason;
 			break;
 		default:
 			chip.innerHTML = '???';
