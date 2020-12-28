@@ -229,7 +229,7 @@ parayer.refchips = {};
 	var rccache = [];
 	
 	// FIXME Method contract missing
-	// TODO When a ref is not found (e.g. deleted from the db), fill in as appropriate (e.g. "(deleted)")
+	// TODO Add click event on chips and redirect accordingly (not so immediate if relatedTo) 
 	context.fillInAll = function($http) {
 		
 		let chips = document.querySelectorAll(".refchip");
@@ -239,7 +239,7 @@ parayer.refchips = {};
 				parayer.refchips.fillIn(chip, cached.data);
 			else {
 				let dbObjUrl = `/_data/${chip.id}`;
-				$http.get(dbObjUrl).then(function(getResp) {					
+				$http.get(dbObjUrl).then(function(getResp) {
 					if(getResp.status==200)
 						if(getResp.statusText=="OK")
 							if(!getResp.data.error) {
