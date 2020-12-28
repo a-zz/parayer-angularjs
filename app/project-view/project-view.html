@@ -158,7 +158,7 @@
 					</textarea>	
 	  			</div>
 	    		<div class="mdc-card__action-icons">
-	    			<span class="note-meta">"{{note.usr}}" (TODO) ({{note.date.toLocaleString()}})</span>
+	    			<span class="note-meta"><div class="mdc-chip refchip" id="{{note.usr}}">...</div>&nbsp;({{note.date.toLocaleString()}})</span>
 	      			<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete" ng-click="deleteNote(this);">
 	      				delete
 	      			</button>
@@ -298,10 +298,10 @@
 				</div>
 				<div class="mdc-card__action-icons">
 					<span class="task-meta">
-						Created by:&nbsp; "{{task.created.usr}}" (TODO) ({{task.created.date.toLocaleString()}})
+						Created by:&nbsp;<div class="mdc-chip refchip" id="{{task.created.usr}}">...</div>&nbsp;({{task.created.date.toLocaleString()}})
 					</span>
 					<span class="task-meta" ng-if="task.created.date!=task.updated.date">
-						; updated by "{{task.created.usr}}" (TODO) ({{task.updated.date.toLocaleString()}})
+						; updated by:&nbsp;<div class="mdc-chip refchip" id="{{task.updated.usr}}">...</div>&nbsp;({{task.updated.date.toLocaleString()}})
 					</span>
 					<button class="material-icons mdc-icon-button mdc-card__action mdc-card__action--icon" title="Delete" ng-click="deleteTask(this);">
 						delete
@@ -338,11 +338,10 @@
 		<br>
 		<div class="detab-list-cntnr">
 			<div class="mdc-card hist-entry-cntnr" ng-repeat="entry in project.history" id="project-hist-entry-{{entry._id}}">
-	  			<div class="mdc-card__primary-action">
-					<span id="project-hist-entry-{{entry._id}}-summary" class="hist-entry-summary">
-						"{{entry.usr}}" (TODO) {{entry.summary}} at {{entry.timestamp.toLocaleString()}}
-					</span>
-	  			</div>
+	  			<div class="mdc-chip refchip" id="{{entry.usr}}">...</div>&nbsp;
+				{{entry.summary}}&nbsp;
+				<div class="mdc-chip refchip" ng-repeat="rel in entry.relatedTo" id="{{rel}}">...</div>&nbsp;
+				({{entry.timestamp.toLocaleString()}})
 			</div>
 		</div>
 	</div>

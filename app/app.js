@@ -223,6 +223,52 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 	}
 })(parayer.history);
 
+parayer.refchips = {};
+(function(context) {
+	
+	var refcache = {};
+	
+	// FIXME Method contract missing
+	context.fillInAll = function($http) {
+		
+		let chips = document.querySelectorAll(".refchip");
+		_.forEach(chips, function(chip) {			
+			if(refcache[chip.id]!=null) {
+				if(refcache[chip.id].expiry>=_.now())
+					parayer.refchips.fillIn(chip, refcache[chip.id].data);
+				else
+					refcache[chip.id] = null;
+			}
+			else {
+				let dbObjUrl = `/_data/${chip.id}`;
+				$http.get(dbObjUrl).then(function(getResp) {
+					if(getResp.status==200)
+						if(getResp.statusText=="OK")
+							parayer.refchips.fillIn(chip, getResp.data);
+				});
+			}
+		});
+	}
+	
+	// FIXME Method contract missing
+	context.fillIn = function(chip, data) {
+				
+		switch(data.type) {
+		case "Usr":
+			chip.innerHTML = data.email;
+			refcache[chip.id] = { "expiry": _.now() + (60 * 60 * 1000), "data": data };
+			break;
+		case "Note":
+		case "ProjectTask":
+			chip.innerHTML = data.summary;
+			refcache[chip.id] = { "expiry": _.now() + (10 * 60 * 1000), "data": data };
+			break;
+		default:
+			chip.innerHTML = '???';
+		}
+	}
+})(parayer.refchips);
+
 parayer.ui = {};	// -- UI management sub-namespace --
 (function(context) {
 	

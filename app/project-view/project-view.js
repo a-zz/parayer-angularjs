@@ -52,7 +52,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 				$scope.project.notes = [];
 				for(let i = 0; i<getResp.data.rows.length; i++)
 					$scope.project.notes.push(new VProjectNote(getResp.data.rows[i].doc));
-				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary'])); 
+				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
+				$scope.$$postDigest(function() {
+					parayer.refchips.fillInAll($http);
+				});				 
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -63,7 +66,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 				$scope.project.tasks = [];
 				for(let i = 0; i<getResp.data.rows.length; i++)
 					$scope.project.tasks.push(new VProjectTask(getResp.data.rows[i].doc));
-				$scope.project.tasks = $scope.sortTasks($scope.project.tasks); 
+				$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
+				$scope.$$postDigest(function() {
+					parayer.refchips.fillInAll($http);
+				});				  
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -79,7 +85,11 @@ angular.module('parayer.projectView', ['ngRoute'])
 			parayer.history.getFor($scope.project._id, $http).then(function(h) {
 				$scope.computeHistoryDateFilters(h);
 				$scope.project.history = h;
+				$scope.$$postDigest(function() {
+					parayer.refchips.fillInAll($http);
+				});				 
 				$scope.$apply(); // TODO Why is this necessary???
+				parayer.refchips.fillInAll($http);
 				parayer.ui.showWait(false);
 			});
 			break;
