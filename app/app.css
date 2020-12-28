@@ -57,6 +57,12 @@ span.note-meta {
 	font-style: italic;
 }
 
+div.refchip {
+	cursor: default;
+	font-style: italic;
+	background: rgba(0, 0, 0, 0.15);	
+}
+
 /* *** FX & animations *** ************************************************** */
 .blinking {
     animation:blinkingText 1.2s infinite;

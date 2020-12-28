@@ -55,21 +55,21 @@ angular.module('parayer.projectView', ['ngRoute'])
 				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
 				$scope.$$postDigest(function() {
 					parayer.refchips.fillInAll($http);
-				});				 
+				});
 				parayer.ui.showWait(false);
 			});
 			break;
 		case 'tab-tasks':
 			// TODO Optimize view: not all fields are required to be emitted as we're using &include_docs=true
 			$scope.objDataUrl = `/_data/_design/project/_view/tasks-by-project?key="${$routeParams.projectId}"&include_docs=true`;
-			$http.get($scope.objDataUrl).then(function(getResp) {				
+			$http.get($scope.objDataUrl).then(function(getResp) {
 				$scope.project.tasks = [];
 				for(let i = 0; i<getResp.data.rows.length; i++)
 					$scope.project.tasks.push(new VProjectTask(getResp.data.rows[i].doc));
 				$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
 				$scope.$$postDigest(function() {
 					parayer.refchips.fillInAll($http);
-				});				  
+				});
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -84,12 +84,11 @@ angular.module('parayer.projectView', ['ngRoute'])
 		case 'tab-history':
 			parayer.history.getFor($scope.project._id, $http).then(function(h) {
 				$scope.computeHistoryDateFilters(h);
-				$scope.project.history = h;
+				$scope.project.history = h;				
 				$scope.$$postDigest(function() {
 					parayer.refchips.fillInAll($http);
-				});				 
+				});
 				$scope.$apply(); // TODO Why is this necessary???
-				parayer.refchips.fillInAll($http);
 				parayer.ui.showWait(false);
 			});
 			break;

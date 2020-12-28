@@ -226,42 +226,76 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 parayer.refchips = {};
 (function(context) {
 	
-	var refcache = {};
+	var rccache = [];
 	
 	// FIXME Method contract missing
+	// TODO When a ref is not found (e.g. deleted from the db), fill in as appropriate (e.g. "(deleted)")
 	context.fillInAll = function($http) {
 		
 		let chips = document.querySelectorAll(".refchip");
-		_.forEach(chips, function(chip) {			
-			if(refcache[chip.id]!=null) {
-				if(refcache[chip.id].expiry>=_.now())
-					parayer.refchips.fillIn(chip, refcache[chip.id].data);
-				else
-					refcache[chip.id] = null;
-			}
+		_.forEach(chips, function(chip) {
+			let cached = parayer.refchips.getCached(chip.id);
+			if(cached)
+				parayer.refchips.fillIn(chip, cached.data);
 			else {
 				let dbObjUrl = `/_data/${chip.id}`;
 				$http.get(dbObjUrl).then(function(getResp) {
 					if(getResp.status==200)
-						if(getResp.statusText=="OK")
+						if(getResp.statusText=="OK") {
 							parayer.refchips.fillIn(chip, getResp.data);
+							parayer.refchips.cacheIn(getResp.data);
+						}
 				});
 			}
 		});
 	}
 	
+	context.getCached = function(_id) {
+		
+		let cached = _.find(rccache, function(o) {
+				return o.data._id==_id;
+		});
+		if(cached) {
+			if(cached.expiry>=_.now())
+				return cached;
+			else {
+				_.remove(rccache, function(o) {
+					return o.data._id==_id;
+				});
+				return null;
+			}
+		}
+		else
+			return null;
+	}
+	
+	context.cacheIn = function(data) {
+		
+		_.remove(rccache, function(o) {
+					return o.data._id==data._id;
+		});
+		let expiry = _.now();
+		switch(data.type) {
+			case "Note":
+			case "ProjectTask":
+				expiry += 10 * 60 * 1000; // 10 minutes
+				break;
+			default:
+				expiry += 60 * 60 * 1000; // default: 1 hour 
+		}
+		rccache.push({ "expiry": expiry, "data": data })
+	}
+		
 	// FIXME Method contract missing
 	context.fillIn = function(chip, data) {
-				
+		
 		switch(data.type) {
 		case "Usr":
 			chip.innerHTML = data.email;
-			refcache[chip.id] = { "expiry": _.now() + (60 * 60 * 1000), "data": data };
 			break;
 		case "Note":
 		case "ProjectTask":
 			chip.innerHTML = data.summary;
-			refcache[chip.id] = { "expiry": _.now() + (10 * 60 * 1000), "data": data };
 			break;
 		default:
 			chip.innerHTML = '???';
