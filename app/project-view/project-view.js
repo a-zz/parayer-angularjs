@@ -82,7 +82,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		case 'tab-files':
 			console.log('TODO To be implemented');
 			parayer.ui.showWait(false);
-			break;
+			break;TODO
 		case 'tab-appointments':
 			console.log('TODO To be implemented');
 			parayer.ui.showWait(false);
@@ -148,7 +148,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 					parayer.history.make(`Updated project info`, $scope.project._id, null, 60 * 60 * 1000, $http);
 					parayer.ui.goHome();
 				}
-				else // TODO Improve this message for (user-side) troubleshooting
+				else
 					parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 			}
 			else
@@ -188,7 +188,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
 						parayer.history.make(`Updated note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
 					}
-					else // TODO Improve this message for (user-side) troubleshooting
+					else
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
@@ -213,7 +213,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 							parayer.refchips.fillInAll($http);
 						});
 					}
-					else // TODO Improve this message for (user-side) troubleshooting
+					else
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`);
 				}
 				else
@@ -245,7 +245,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, null, null, $http);
 						parayer.ui.showSnackbar('Note deleted!	', 'info');
 					}
-					else // TODO Improve this message for (user-side) troubleshooting
+					else
 						parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`);
 				}
 				else
@@ -325,7 +325,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 							parayer.refchips.fillInAll($http);
 						});
 					}
-					else // TODO Improve this message for (user-side) troubleshooting
+					else
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
@@ -351,7 +351,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 							parayer.refchips.fillInAll($http);
 						});
 					}
-					else // TODO Improve this message for (user-side) troubleshooting
+					else
 						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
 				}
 				else
@@ -383,7 +383,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 						parayer.history.make(`Deleted task "${t.summary}"`, $scope.project._id, null, null, $http);
 						parayer.ui.showSnackbar('Task deleted!	', 'info');
 					}
-					else // TODO Improve this message for (user-side) troubleshooting
+					else
 						parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`); 
 				}
 				else
