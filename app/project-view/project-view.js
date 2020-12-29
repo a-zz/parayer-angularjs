@@ -45,20 +45,15 @@ angular.module('parayer.projectView', ['ngRoute'])
 		
 		switch(tabId) {
 		case 'tab-notes':
-			// TODO Optimize view: maybe not all fields are required to be emitted as we're using &include_docs=true
-			$scope.objDataUrl = `/_data/_design/global-scope/_view/notes-attached-to?key="${$routeParams.projectId}"&include_docs=true`;
-			$http.get($scope.objDataUrl).then(function(getResp) {
-				// TODO As global, note handling should be moved elsewhere
-				$scope.project.notes = [];
-				for(let i = 0; i<getResp.data.rows.length; i++)
-					$scope.project.notes.push(new VProjectNote(getResp.data.rows[i].doc));
-				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
+			parayer.notes.getFor($scope.project._id, $http).then(function(n) {
+				$scope.project.notes = _.reverse(_.sortBy(n, ['date', 'summary']));
 				$scope.$$postDigest(function() {
 					parayer.refchips.fillInAll($http);
 					_.forEach(document.querySelectorAll('textarea.note-descr'), function(t) {
 						parayer.ui.txtFitContents(t);
-					});	
+					});
 				});
+				$scope.$apply(); // TODO Why is this necessary???
 				parayer.ui.showWait(false);
 			});
 			break;
@@ -157,7 +152,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 	}
 	
 	// -- Project NOTES management --
-	// TODO As global, note handling should be moved elsewhere	
 	// TODO User-selectable colours for notes would be fine!	
 	$scope.filterNotesByText = function(src) {
 		
@@ -174,54 +168,24 @@ angular.module('parayer.projectView', ['ngRoute'])
 	$scope.updateNote = function(src) {
 
 		let n = src.note;
-		if(n.changed) {			
-			// TODO Consider summary field validation as per https://docs.angularjs.org/api/ng/input/input%5Bdate%5D#examples
-			if(n.summary.trim()=='') {
-				parayer.ui.showSnackbar('A note summary is required!', 'warn');
-				return;
-			}			
-			let dbObjUrl = `/_data/${n._id}`; 
-			$http.put(dbObjUrl, n.stringify()).then(function(putResp) {
-				if(putResp.status==200) {
-					if(putResp.data.ok) {						
-						n.refresh(putResp.data.rev);
-						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
-						parayer.history.make(`Updated note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
-					}
-					else
-						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`); 
-				}
-				else
-					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');			
+		if(n.changed)	
+			n.update($http).then(function() {
+				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
+				parayer.history.make(`Updated note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
 			});
-		}		
 	}	
 	
 	$scope.newNote = function() {
 		
 		// TODO Clean note filter prior to inserting (as filter may leave the new note out)
-		$http.get('/_uuid').then(function(respUuid) {
-			let n = new VProjectNote(respUuid.data.uuid);
-			let dbObjUrl = `/_data/${n._id}`;	
-			$http.put(dbObjUrl, n.stringify()).then(function(putResp) {
-				if(putResp.status==200) {
-					if(putResp.statusText=='OK') {
-						n.refresh(putResp.data.rev);
-						$scope.project.notes.unshift(n);
-						parayer.history.make(`Added a new note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
-						$scope.$$postDigest(function() {
-							parayer.refchips.fillInAll($http);
-							document.querySelector(`#project-note-${n._id}-summary`).focus();
-						});
-					}
-					else
-						parayer.ui.showSnackbar(`Oops! ${putResp.data.reason}`);
-				}
-				else
-					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
-					
+		parayer.notes.create($scope.project._id, $http).then(function (n) {			
+			$scope.project.notes.unshift(n);
+			parayer.history.make(`Added a new note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
+			$scope.$$postDigest(function() {
+				parayer.refchips.fillInAll($http);
+				document.querySelector(`#project-note-${n._id}-summary`).focus();
 			});
-		});	
+		});
 	}
 	
 	$scope.deleteNote = function(src, confirmed) {
@@ -232,25 +196,13 @@ angular.module('parayer.projectView', ['ngRoute'])
 			return;
 		}
 		else {
-			let n = src.note;
-			let dbObjUrl = `/_data/${n._id}`;
-			$http.delete(`${dbObjUrl}?rev=${n._rev}`).then(function(delResp) {
-				if(delResp.status==200) {
-					if(delResp.statusText=='OK') {
-						for(let j = 0; j<$scope.project.notes.length; j++)
-							if($scope.project.notes[j]._id==n._id) {
-								$scope.project.notes.splice(j, 1);
-								break;
-							}
-						$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
-						parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, null, null, $http);
-						parayer.ui.showSnackbar('Note deleted!	', 'info');
-					}
-					else
-						parayer.ui.showSnackbar(`Oops! ${delResp.data.reason}`);
-				}
-				else
-					parayer.ui.showSnackbar('Oops! Something went wrong, contact your system admin', 'error');
+			let n = src.note;			
+			n.delete($http).then(function() {
+				_.remove($scope.project.notes, function(o) {
+					return o._id==n._id;
+				});
+				$scope.project.notes = _.reverse(_.sortBy($scope.project.notes, ['date', 'summary']));
+				parayer.history.make(`Deleted note "${n.summary}"`, $scope.project._id, null, null, $http);
 			});
 		}
 	}
@@ -527,53 +479,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 			
 			this._rev = rev;	
 		}
-	}
-	
-	class VProjectNote {
-
-		constructor(d) {
-		
-			if(typeof(d)==='object') {
-				this._id = d._id;
-				this._rev = d._rev; 
-				this.type = d.type;
-				this.summary = d.summary; 
-				this.descr = d.descr;
-				this.usr = d.usr;
-				this.date = d.date!=''?new Date(Date.parse(d.date)):null;
-				this.attachedTo = $scope.project._id;
-			}
-			else {
-				this._id = d;
-				this.type = 'Note';
-				this.summary = 'New note';
-				this.descr = '';
-				this.usr = parayer.auth.getUsrId();
-				this.date = new Date();
-				this.attachedTo = $scope.project._id;
-			}		
-		}
-		
-        stringify() {
-	
-            let o = {
-                "_id": this._id,
-				"_rev": this._rev,
-                "type": this.type,
-                "summary": this.summary,
-                "descr": this.descr,
-				"usr": this.usr,
-				"date": this.date.toISOString(),
-				"attachedTo": this.attachedTo
-            };
-            return JSON.stringify(o);
-        }
-
-		refresh(rev) {
-				
-			this.changed = false;
-			this._rev = rev;
-		}		
 	}
 	
     class VProjectTask {

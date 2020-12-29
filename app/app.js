@@ -223,7 +223,156 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 	}
 })(parayer.history);
 
-parayer.refchips = {};
+parayer.notes = {}; 	// -- App-wide note management sub-namespace --
+(function(context) {
+
+	class VNote {
+
+		// FIXME Method contract missing
+		constructor(d) {
+		
+			this._id = d._id;
+			this._rev = d._rev; 
+			this.type = d.type;
+			this.summary = d.summary; 
+			this.descr = d.descr;
+			this.usr = d.usr;
+			this.date = d.date!=''?new Date(Date.parse(d.date)):null;
+			this.attachedTo = d.attachedTo;
+		}
+
+		// FIXME Method contract missing
+		stringify() {
+
+			let o = {
+				"_id": this._id,
+				"_rev": this._rev,
+				"type": this.type,
+				"summary": this.summary,
+				"descr": this.descr,
+				"usr": this.usr,
+				"date": this.date.toISOString(),
+				"attachedTo": this.attachedTo
+			};
+			return JSON.stringify(o);
+		}
+
+		// FIXME Method contract missing
+		refresh(rev) {
+				
+			this.changed = false;
+			this._rev = rev;
+		}
+
+		// FIXME Method contract missing
+		delete($http) {
+			
+			let n = this;
+			let p = new Promise(function(resolve, reject) {
+				let dbObjUrl = `/_data/${n._id}`;
+				$http.delete(`${dbObjUrl}?rev=${n._rev}`).then(function(delResp) {
+					if(delResp.status==200) {
+						if(delResp.statusText=='OK') {
+							parayer.ui.showSnackbar('Note deleted!	', 'info');
+							resolve();
+						}
+						else {
+							parayer.ui.showSnackbar(`Note deletion failed! ${delResp.data.reason}`);
+							reject();
+						}
+					}
+					else
+						parayer.ui.showSnackbar('Note deletion failed! Contact your system admin', 'error');
+				});
+			});
+			return p;
+		}
+
+		// FIXME Method contract missing
+		update($http) {
+
+			let n = this;
+			let p = new Promise(function(resolve, reject) {
+				if(n.summary.trim()=='') {
+					parayer.ui.showSnackbar('A note summary is required!', 'warn');
+					reject();
+				}
+				let dbObjUrl = `/_data/${n._id}`; 
+				$http.put(dbObjUrl, n.stringify()).then(function(putResp) {
+					if(putResp.status==200) {
+						if(putResp.data.ok) {						
+							n.refresh(putResp.data.rev);
+							resolve();
+						}
+						else {
+							parayer.ui.showSnackbar(`Note update failed! ${putResp.data.reason}`);
+							reject();
+						} 
+					}
+					else {
+						parayer.ui.showSnackbar('Note udpate failed! Contact your system admin', 'error');
+						reject();
+					}
+				});
+			});
+			return p;
+		}
+	}
+	
+	// FIXME Method contract missing
+	context.getFor = function(objectId, $http) {
+
+		let p = new Promise(function (resolve, reject) {
+			// TODO Optimize view: maybe not all fields are required to be emitted as we're using &include_docs=true
+			let objDataUrl = `/_data/_design/global-scope/_view/notes-attached-to?key="${objectId}"&include_docs=true`;
+			$http.get(objDataUrl).then(function(getResp) {
+				let r = [];
+				for(let i = 0; i<getResp.data.rows.length; i++)
+					r.push(new VNote(getResp.data.rows[i].doc));
+				resolve(r); 
+			});
+		});
+		return p;
+	}
+	
+	// FIXME Method contract missing
+	context.create = function(attachedTo, $http) {
+
+		let p = new Promise(function (resolve, reject) {
+			$http.get('/_uuid').then(function(respUuid) {
+				let n = new VNote({
+					"_id": respUuid.data.uuid,
+					"type": "Note",
+					"summary": "New note",
+					"descr": "",
+					"usr": parayer.auth.getUsrId(),
+					"date": new Date().toISOString(),
+					"attachedTo": attachedTo
+				});
+				let dbObjUrl = `/_data/${n._id}`;	
+				$http.put(dbObjUrl, n.stringify()).then(function(putResp) {
+					if(putResp.status==200) {
+						if(!putResp.data.ok) {
+							parayer.ui.parayer.ui.showSnackbar(`Note creation failed! ${putResp.data.reason}`);
+							reject();
+						}
+						else {
+							n.refresh(putResp.data.rev);
+							resolve(n);
+						}
+					 } 
+					else {
+						parayer.ui.showSnackbar('Note creation failed! Contact your system admin', 'error');
+						reject();
+					}
+				});
+			});
+		});
+		return p;
+	}
+})(parayer.notes);
+
+parayer.refchips = {}; 	// -- App-wide reference chips management sub-namespace --
 (function(context) {
 	
 	var rccache = [];
