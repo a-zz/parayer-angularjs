@@ -199,6 +199,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	
 	$scope.newNote = function() {
 		
+		// TODO Clean note filter prior to inserting (as filter may leave the new note out)
 		$http.get('/_uuid').then(function(respUuid) {
 			let n = new VProjectNote(respUuid.data.uuid);
 			let dbObjUrl = `/_data/${n._id}`;	
@@ -207,10 +208,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 					if(putResp.statusText=='OK') {
 						n.refresh(putResp.data.rev);
 						$scope.project.notes.unshift(n);
-						// TODO Focus new note's summary input
 						parayer.history.make(`Added a new note`, $scope.project._id, [n._id], 60 * 60 * 1000, $http);
 						$scope.$$postDigest(function() {
 							parayer.refchips.fillInAll($http);
+							document.querySelector(`#project-note-${n._id}-summary`).focus();
 						});
 					}
 					else
@@ -257,14 +258,6 @@ angular.module('parayer.projectView', ['ngRoute'])
 	// -- Project TASKS management --
 	// TODO Improvement: second click on a chip should reverse the sort
 	// TODO Keep sort and text filter on tab focus
-	$scope.tasksFitContents = function() {
-		
-		_.forEach(document.querySelectorAll('textarea.task-descr'), function(t) {
-			t.style.height = '1px'; 
-			t.style.height = (25 + t.scrollHeight) + 'px';
-		});
-	}
-	
 	$scope.setTaskSort = function(selected) {
 		
 		let sortChips = document.querySelectorAll('div.mdc-chip');
@@ -336,6 +329,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 	
 	$scope.newTask = function() {
 		
+		// TODO Clean task filter prior to inserting (as filter may leave the new task out)
 		$http.get('/_uuid').then(function(respUuid) {
 			let t = new VProjectTask(respUuid.data.uuid);
 			let dbObjUrl = `/_data/${t._id}`;	
@@ -345,10 +339,10 @@ angular.module('parayer.projectView', ['ngRoute'])
 						t.refresh(putResp.data.rev);
 						$scope.project.tasks.unshift(t);
 						$scope.project.tasks = $scope.sortTasks($scope.project.tasks);
-						// TODO Focus new task's summary input
 						parayer.history.make(`Added a new task`, $scope.project._id, [t._id], 60 * 60 * 1000, $http);
 						$scope.$$postDigest(function() {
 							parayer.refchips.fillInAll($http);
+							document.querySelector(`#project-task-${t._id}-summary`).focus();
 						});
 					}
 					else
