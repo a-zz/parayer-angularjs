@@ -82,7 +82,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 		case 'tab-files':
 			console.log('TODO To be implemented');
 			parayer.ui.showWait(false);
-			break;TODO
+			break;
 		case 'tab-appointments':
 			console.log('TODO To be implemented');
 			parayer.ui.showWait(false);
