@@ -145,6 +145,7 @@ angular.module('parayer.projectView', ['ngRoute'])
 			if(putResp.status==200) {
 				if(putResp.data.ok){
 					p.refresh(putResp.data.rev);
+					parayer.history.make(`Updated project info`, $scope.project._id, null, 60 * 60 * 1000, $http);
 					parayer.ui.goHome();
 				}
 				else // TODO Improve this message for (user-side) troubleshooting
