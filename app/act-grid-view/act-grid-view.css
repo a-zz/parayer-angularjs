@@ -1,144 +1,135 @@
 /* ************************************************************************** *
  * parayer :: activity grid stylesheet                                        *
  * ************************************************************************** */
+div.mdc-data-table#act-grid-cntnr-main {
+	height: 100%;
+	max-height: 100%;
+	width: 100%;
+	overflow-x: auto;
+	overflow-y: hidden;	
+	visibility: hidden;
+}
 
-.act-grid { 
-	font-size: 10pt;
-	margin: 0em; 
-	border: none;
-	border-collapse: collapse;
-    border-spacing: 1px;
+div#act-grid-cntnr {
+	height: 100%;
+	overflow-y: hidden;	
 }
 
 table.act-grid {
-	width: 95%;	
-	margin: 0.5em;
-	background: transparent;
+	display: block;
+	height: 100%;
 }
 
 thead.act-grid {
 	display: block;
-}
-
-tbody.act-grid { 
-	display: block; 
+	height: auto;
+	width: 100%;
 }
 
 tbody.act-grid {
-    overflow-y: auto;
-    overflow-x: hidden;
+	display: block;
+	height: auto;
+	min-height: 35%;
+	width: 100%;
 }
 
-tr.act-grid {
-	pointer-events: none;	
+tbody.act-grid {
+	height: 30vh; 
+	overflow-y: scroll;
+	overflow-x: auto;
 }
 
-tr.act-grid:hover td {	
-	background: lightyellow;	
-	opacity: 0.75;
-}
-th.act-grid {
-	width: 10%;
-}
-
-th.sum {
-	font-weight: bold;
+th.wday-label {
+	text-align: right;
 }
 
 th.today {
-	color: darkorange;
+	color: orange;
 }
 
-td.act-grid {
-	pointer-events: auto;
-}
-
-input.act-grid-label-area { 
-	margin-left: 0.5em;
-	margin-right: 0pt; 
-	font-weight: bold; 
-}
-
-input.act-grid-label-group { 
-	margin-left: 1.5em;
-	margin-right: 0em;
-}
-
-input.act-grid-label-project { 
-	margin-left: 2.5em; 
-	margin-right: 0em;
-	font-style: italic; 
-}
-
-input.act-grid-label {
-	border: none;
-	padding-right: 0em;
-	background: transparent;
-}
-
-input.act-grid-label:focus {
-	border: none;	
-	border-bottom: 1px dashed orange;
-	background-color: lightyellow;
-}
-
-td.act-grid-cntnr-control {
-	text-align: right;
-	width: 5em;
-	opacity: 0.05;
-	float: right;
-}
-
-.act-grid-control {
-	text-decoration: none;
-	margin: none;
-	padding: 0.1em;
-	border: 1px solid transparent;
-	border-radius: 0.3em;
-}
-
-.act-grid-control:hover {
-	text-decoration: none;
-	border: 1px solid lightgrey;
-	cursor: pointer;
-}
-
-td.effort {
-	border: 1px solid lightgrey;
-}
-
-td.effort:hover .effort-control {	
-	opacity: 0.75;
-}
-
-.effort-control {
-	opacity: 0.05;
-	margin: none;
-	padding: 0.1em;
-	border: 1px solid transparent;
-	border-radius: 0.3em;
-}
-
-.effort-control:hover {
-	border: 1px solid lightgrey;
-	cursor: pointer;
-} 
-
-td.sum {
+th.act-area {
 	font-weight: bold;
 }
 
-input.act-grid-effort {
-	background: transparent;
-	border: none;
-	padding: 0.1em;
+tr.act-grp {
+	/*display: none;*/
+}	
+
+th.act-grp {
+	padding-left: 2em; 
+}
+
+tr.project {
+	/*display: none;*/
+}
+
+th.project {
+	padding-left: 7em;
+	font-style: italic;
+}
+
+a.activity-label {
+	text-decoration: none;
+	color: initial;
+	transition: border 0.5s;
+}
+
+a.activity-label:hover {
+	border-bottom: orange 0.1em dashed;
+}
+
+td.effort {
+	text-align: right;
+	border-left: silver 1px dotted;
+	border-right: silver 1px dotted;
+}
+
+td.effort:hover > span.effort-control{
+	opacity: 0.65;
+} 
+
+span.effort-control {
+	display: inline-block;
+	cursor: pointer; 
+	border: transparent 1px solid;
+	border-radius: 0.5em;
+	width: 1em;
+	opacity: 0;
+	transition: opacity 0.5s;
+	text-align: center;
+	font-weight: bold;
+	border: silver 1px solid;
+}
+
+span.effort-control:hover {
+ 	border: orange 1px solid;
+ 	color: darkorange;
+}
+
+span.effort-value {
+	display: inline-block;
 	width: 3em;
 	text-align: right;
 }
 
-input.act-grid-effort:focus {
-	border: none;	
-	border-bottom: 1px dashed orange;
-	background-color: lightyellow;
+.mdc-data-table__header-cell {
+	font-weight: bold;
+	text-align: center;
+}
+
+th.hlabel {
+	font-size: 75%;
+	vertical-align: top;
+}
+
+td.time-slot {
+	border-left: silver 1px dotted;
+	border-right: silver 1px dotted;
+}
+
+td.sum {
+	font-weight: bold;
+	color: darkgray;
+	text-align: right;
 }
 /* ************************************************************************** */

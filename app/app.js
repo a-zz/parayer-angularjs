@@ -532,6 +532,22 @@ parayer.ui = {};	// -- UI management sub-namespace --
 		t.style.height = '1px'; 
 		t.style.height = (25 + t.scrollHeight) + 'px';
 	}
+	
+	// FIXME Method contract missing
+	// See: https://stackoverflow.com/a/13382873
+	context.getScrollbarWidth = function() {
+
+		const outer = document.createElement('div');
+		outer.style.visibility = 'hidden';
+		outer.style.overflow = 'scroll'; 
+		outer.style.msOverflowStyle = 'scrollbar'; 
+		document.body.appendChild(outer);
+		const inner = document.createElement('div');
+		outer.appendChild(inner);
+		const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+		outer.parentNode.removeChild(outer);
+		return scrollbarWidth;
+	}
 })(parayer.ui);
 
 parayer.util = {};	// -- General utility sub-namespace --
