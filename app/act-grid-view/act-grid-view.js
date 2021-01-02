@@ -11,7 +11,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 }])
 .controller('actGridViewCtrl', ['$scope', '$http', function($scope, $http) {
 
-	// UI setup
+	// -- UI setup ---------------------------------------------------------------------------------------------------------------------------------------------
 	document.body.style.height = '100vh';
 	document.body.style.overflow = 'hidden';
 	document.querySelector('div#main-cntnr').style.height = '100%';
@@ -20,12 +20,12 @@ angular.module('parayer.actGridView', ['ngRoute'])
 		document.body.style.height = '';
 		document.body.style.overflow = '';
 		document.querySelector('div#main-cntnr').style.height = '';
-		document.querySelector('main#main-content').style.height = '';		
-	});
-	// TODO Resize event (and drawer close) -> gridLayout()
+		document.querySelector('main#main-content').style.height = '';
+		parayer.ui.setOnDrawerChange(null);	
+	});	
 	parayer.ui.showWait(true);
 	parayer.ui.setLocation('Activity grid');
-	const actGrid = new mdc.dataTable.MDCDataTable(document.querySelector('.mdc-data-table'));
+	new mdc.dataTable.MDCDataTable(document.querySelector('.mdc-data-table'));
 	$scope.gridLayout = function() {
 		let sbw = parayer.ui.getScrollbarWidth();
 		let twdth = document.querySelector('table.act-grid').offsetWidth;
@@ -40,8 +40,10 @@ angular.module('parayer.actGridView', ['ngRoute'])
 			});
 		}
 	}
+	window.onresize = $scope.gridLayout;
+	parayer.ui.setOnDrawerChange($scope.gridLayout);
 		
-	// Scope initialization	
+	// -- Scope initialization ---------------------------------------------------------------------------------------------------------------------------------	
 	$scope.selectedDate = new Date();
 	$scope.selectedWeek = parayer.date.computeWeek($scope.selectedDate);	
 	$scope.myActList = [];	
@@ -50,7 +52,7 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	$scope.projects = [];
 	$scope.loadFromDb = function() {
 		
-		// TODO View object implementation
+		// TODO Migrate to view object scheme
 		let usrId = parayer.auth.getUsrId();
 		$http.get(`/_data/_design/activity/_view/activity-area-by-assign-usr` +
 			`?key="${usrId}"`).then(function(respActAreas) {
@@ -95,30 +97,8 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	}	
 	$scope.loadFromDb();
 		
-	// Event handlers
-	$scope.activityChanges = [];
-	$scope.trackActivityChange = function(src) {
+	// -- View worker ------------------------------------------------------------------------------------------------------------------------------------------
+
+	// -- View objects -----------------------------------------------------------------------------------------------------------------------------------------
 		
-		$scope.activityChanges.push(src.activity.id);
-	}	
-	
-	$scope.updateActivity = function(src) {
-				
-		for(let i = 0; i<$scope.activityChanges.length; i++) {
-			if($scope.activityChanges[i]==src.activity.id) {
-				let dbObjUrl = `/_data/${src.activity.id}`; 
-				$http.get(dbObjUrl).then(function(qryResp) {					
-					var activity = qryResp.data;
-					activity.name = src.activity.value.name;
-					// TODO Other fields...
-					$http.put(dbObjUrl, JSON.stringify(activity)).then(function(updResp) {
-						// TODO Check resp, warn of failures
-						$scope.activityChanges.splice(i, 1);	
-					});					
-				});				
-				break;
-			}
-		}
-		// TODO Activity grid might need to be re-sorted after tree update 
-	}
 }]);

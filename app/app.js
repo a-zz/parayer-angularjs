@@ -463,6 +463,7 @@ parayer.ui = {};	// -- UI management sub-namespace --
 	
 	let topAppBar;	
 	let drawer;
+	let drawerOnChange = null;
 	let snackbar;
 	let simpleConfirmDialog;
 	
@@ -480,6 +481,20 @@ parayer.ui = {};	// -- UI management sub-namespace --
 		// FIXME setEscapeKeyAction('cancel') and simpleConfirmDialog.setScrimClickAction('cancel') not working?!
 		//simpleConfirmDialog.setEscapeKeyAction('cancel');
 		//simpleConfirmDialog.setScrimClickAction('cancel');
+	}
+	
+	context.setOnDrawerChange = function(fn) {
+		
+		if(fn!=null) {			
+			drawer.listen('MDCDrawer:opened', fn);
+			drawer.listen('MDCDrawer:closed', fn);
+			drawerOnChange = fn;
+		}
+		else {
+			drawer.unlisten('MDCDrawer:opened', drawerOnChange);
+			drawer.unlisten('MDCDrawer:closed', drawerOnChange);
+			drawerOnChange = null;			
+		}
 	}
 
 	// FIXME Method contract missing
