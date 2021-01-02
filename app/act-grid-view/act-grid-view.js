@@ -16,6 +16,13 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	document.body.style.overflow = 'hidden';
 	document.querySelector('div#main-cntnr').style.height = '100%';
 	document.querySelector('main#main-content').style.height = '100%';
+	$scope.$on('$destroy', function() {
+		document.body.style.height = '';
+		document.body.style.overflow = '';
+		document.querySelector('div#main-cntnr').style.height = '';
+		document.querySelector('main#main-content').style.height = '';		
+	});
+	// TODO Resize event (and drawer close) -> gridLayout()
 	parayer.ui.showWait(true);
 	parayer.ui.setLocation('Activity grid');
 	const actGrid = new mdc.dataTable.MDCDataTable(document.querySelector('.mdc-data-table'));
