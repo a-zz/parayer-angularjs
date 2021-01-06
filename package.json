@@ -13,6 +13,7 @@
     "express": "^4.17.1",
     "lodash": "^4.17.20",
     "material-components-web": "^8.0.0",
+    "material-icons": "^0.5.2",
     "retus": "^1.1.2",
     "simple-node-logger": "^18.12.24",
     "uuid": "^8.3.2"
@@ -31,7 +32,7 @@
     "postinstall": "npm run copy-libs",
     "update-deps": "npm update",
     "postupdate-deps": "npm run copy-libs",
-    "copy-libs": "cpx \"node_modules/{{angular,angular-*,material-components-web/dist}/**/*,lodash/lodash.js}\" app/lib -C",
+    "copy-libs": "cpx \"node_modules/{{angular,angular-*,material-components-web/dist,material-icons}/**/*,lodash/lodash.js}\" app/lib -C",
     "pretest": "npm install",
     "test": "karma start dev/karma.conf.js",
     "test-single-run": "npm test -- --single-run",
