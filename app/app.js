@@ -190,7 +190,7 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 				let dbObjUrl = `/_data/${e._id}`;	
 				$http.put(dbObjUrl, e.stringify()).then(function(putResp) {
 					if(putResp.status==200) {
-						if(!putResp.data.ok) // TODO Improve this message for (user-side) troubleshooting
+						if(!putResp.data.ok) 
 							parayer.ui.showSnackbar(`History saving failed! ${putResp.data.reason}`);
 					 } 
 					else
@@ -204,8 +204,7 @@ parayer.history = {};	// -- App-wide history management sub-namespace --
 				h = _.filter(h, { "usr": parayer.auth.getUsrId(), "relatedTo": relatedTo });
 				let now = new Date();
 				h = _.filter(h, function(o) { 
-					// TODO Compute time difference in millis
-					return parayer.date.diff(now, o.timestamp) <= aggregate;					
+						return parayer.date.diff(now, o.timestamp) <= aggregate;					
 				 });
 				if(h.length==0) //Can't aggregate, new entry
 					parayer.history.make(summary, attachedTo, relatedTo, null, $http);
