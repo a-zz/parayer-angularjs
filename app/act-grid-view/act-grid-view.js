@@ -52,39 +52,41 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	$scope.projects = [];
 	$scope.loadFromDb = function() {
 		
-		// TODO Migrate to view object scheme
 		let usrId = parayer.auth.getUsrId();
 		$http.get(`/_data/_design/activity/_view/activity-area-by-assign-usr` +
 			`?key="${usrId}"`).then(function(respActAreas) {
+			let areas = [];
+			_.forEach(_.sortBy(respActAreas.data.rows, ['value.name']), function(row) {
+				areas.push(new VActivity(row));
+			});
 			$http.get(`/_data/_design/activity/_view/activity-group-by-assign-usr` +
 				`?key="${usrId}"`).then(function(respActGroups) {
+				let groups = [];
+				_.forEach(_.sortBy(respActGroups.data.rows, ['value.name']), function(row) {
+					groups.push(new VActivity(row));
+				});
 				$http.get(`/_data/_design/activity/_view/project-by-assign-usr` +
 				`?key="${usrId}"`).then(function(respActProjects) {
-					let areas = _.sortBy(respActAreas.data.rows, ['value.name']); 
-					for(let iArea = 0; iArea<areas.length; iArea++) {
-						$scope.myActList.push(areas[iArea]);
-						$scope.areas.push(areas[iArea]);
-						let groups = [];
-						for(let iGroup = 0; iGroup<respActGroups.data.rows.length; iGroup++) {
-							if(respActGroups.data.rows[iGroup].value.actArea==areas[iArea].id)
-								groups.push(respActGroups.data.rows[iGroup]);
-						}
-						groups = _.sortBy(groups, ['value.name']); 
-						for(let iGroup = 0; iGroup<groups.length; iGroup++) { 
-							$scope.myActList.push(groups[iGroup]);
-							$scope.groups.push(groups[iGroup]);
-							let projects = [];
-							for(let iProject = 0; iProject<respActProjects.data.rows.length; iProject++) {
-								if(respActProjects.data.rows[iProject].value.actGrp==groups[iGroup].id)
-									projects.push(respActProjects.data.rows[iProject]);
-							}
-							projects = _.sortBy(projects, ['value.name']);
-							for(let iProject = 0; iProject<projects.length; iProject++) { 
-								$scope.myActList.push(projects[iProject]);
-								$scope.projects.push(projects[iProject]);								
-							}
-						}
-					}
+					let projects = [];
+					_.forEach(_.sortBy(respActProjects.data.rows, ['value.name']), function(row) {
+						projects.push(new VActivity(row));
+					});			
+					_.forEach(areas, function(a) {
+						$scope.areas.push(a);
+						$scope.myActList.push(a);
+						_.forEach(_.filter(groups, function(g) {
+							return g.parent==a.id;
+						}), function(g) {
+							$scope.groups.push(g);
+							$scope.myActList.push(g);
+							_.forEach(_.filter(projects, function(p) {
+								return p.parent==g.id;
+							}), function(p) {
+								$scope.projects.push(p);
+								$scope.myActList.push(p);
+							})
+						});
+					});	
 					$scope.$$postDigest(function() {
 						// TODO Improve this: there's a flash before grid layout
 						$scope.gridLayout();
@@ -98,7 +100,57 @@ angular.module('parayer.actGridView', ['ngRoute'])
 	$scope.loadFromDb();
 		
 	// -- View worker ------------------------------------------------------------------------------------------------------------------------------------------
+	$scope.moreOrLess = function(src) {
+		
+		let btn = document.querySelector(`button#mol-btn-${src.activity.id}`);
+		if(btn.innerHTML.indexOf('expand_more')!=-1)
+			$scope.showMore(src.activity.id, btn); 
+		else
+			$scope.showLess(src.activity.id, btn);
+	}
+	
+	$scope.showMore = function(id, btn) {
+		
+		btn.innerHTML = 'expand_less';
+		btn.ariaLabel = 'Show less';
+		btn.title = 'Show less';
+		_.forEach(document.querySelectorAll(`tr.child-of-${id}`), function(tr) {
+			tr.style.display = 'revert';
+		});		
+	}
+	
+	$scope.showLess = function(id, btn) {
+		
+		btn.innerHTML = 'expand_more';
+		btn.ariaLabel = 'Show more';
+		btn.title = 'Show more';
+		_.forEach(document.querySelectorAll(`tr.child-of-${id}`), function(tr) {
+			let btn2 = document.querySelector(`button#mol-btn-${tr.id}`);
+			if(btn2!=null)
+				$scope.showLess(tr.id, btn2);
+			tr.style.display = 'none';
+		});
+	}
 
 	// -- View objects -----------------------------------------------------------------------------------------------------------------------------------------
+	class VActivity {
 		
+		constructor(d) {
+			
+			this.id = d.id;
+			this.type = d.value.type;
+			this.name = d.value.name;
+			this.descr = d.value.descr;
+			switch(d.value.type) {
+			case 'ActGrp':
+				this.parent = d.value.actArea;
+				break;
+			case 'Project':
+				this.parent = d.value.actGrp;
+				break;
+			default:
+				this.parent = null;
+			} 
+		}
+	}
 }]);

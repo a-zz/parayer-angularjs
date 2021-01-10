@@ -52,7 +52,7 @@ th.act-area {
 }
 
 tr.act-grp {
-	/*display: none;*/
+	display: none;
 }	
 
 th.act-grp {
@@ -60,7 +60,7 @@ th.act-grp {
 }
 
 tr.project {
-	/*display: none;*/
+	display: none;
 }
 
 th.project {

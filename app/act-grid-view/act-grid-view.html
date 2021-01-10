@@ -14,25 +14,26 @@
 				</tr>
 			</thead>
 			<tbody class="mdc-data-table__content act-grid">
-				<tr ng-repeat="activity in myActList" class="mdc-data-table__row act-grid {{activity.value.type=='ActArea'?'act-area':activity.value.type=='ActGrp'?'act-grp':'project'}}">
-					<th class="mdc-data-table__cell c01 {{activity.value.type=='ActArea'?'act-area':activity.value.type=='ActGrp'?'act-grp':'project'}}">
-						<button class="mdc-icon-button material-icons" aria-label="Show less" title="Show more"
-						ng-if="activity.value.type=='ActArea' || activity.value.type=='ActGrp'">
+				<tr ng-repeat="activity in myActList" id="{{activity.id}}" 
+					class="mdc-data-table__row act-grid {{activity.type=='ActArea'?'act-area':activity.type=='ActGrp'?'act-grp':'project'}} {{activity.parent!=null?'child-of-'+activity.parent:''}}">
+					<th class="mdc-data-table__cell c01 {{activity.type=='ActArea'?'act-area':activity.type=='ActGrp'?'act-grp':'project'}}">
+						<button class="mdc-icon-button material-icons" id="mol-btn-{{activity.id}}" aria-label="Show more" title="Show more"
+						ng-if="activity.type=='ActArea' || activity.type=='ActGrp'" ng-model="activity" ng-click="moreOrLess(this);">
 							expand_more
 						</button>
-						<a href="#!/{{activity.value.type=='ActArea'?'act-area':activity.value.type=='ActGrp'?'act-group':'project'}}/{{activity.id}}" 
-							class="activity-label" title="{{activity.value.descr}}">{{activity.value.name}}</a>
+						<a href="#!/{{activity.type=='ActArea'?'act-area':activity.type=='ActGrp'?'act-group':'project'}}/{{activity.id}}" 
+							class="activity-label" title="{{activity.descr}}">{{activity.name}}</a>
 					</th>
 					<th class="mdc-data-table__cell c02" scope="row">
-						<button class="mdc-icon-button material-icons" ng-if="activity.value.type!='Project'"
-							aria-label="New {{activity.value.type=='ActArea'?'activity group':'project'}}" 
-							title="New {{activity.value.type=='ActArea'?'activity group':'project'}}">add_library</button>					
+						<button class="mdc-icon-button material-icons" ng-if="activity.type!='Project'"
+							aria-label="New {{activity.type=='ActArea'?'activity group':'project'}}" 
+							title="New {{activity.type=='ActArea'?'activity group':'project'}}">add_library</button>					
 					</th>
 					<td class="mdc-data-table__cell c03 {{d.today?'today':''}} effort" ng-repeat="d in selectedWeek">
-						<span class="effort-control" title="Reset effort" aria-label="Reset effort" ng-if="activity.value.type=='Project'">x</span>
-						<span class="effort-control" title="Subtract effort unit" aria-label="Subtract effort unit" ng-if="activity.value.type=='Project'">-</span>
-						<span class="effort-control" title="Add effort unit" aria-label="Add effort unit" ng-if="activity.value.type=='Project'">+</span>
-						<span class="effort-value" contenteditable="{{activity.value.type=='Project'?'true':'false'}}">0:00</span>
+						<span class="effort-control" title="Reset effort" aria-label="Reset effort" ng-if="activity.type=='Project'">x</span>
+						<span class="effort-control" title="Subtract effort unit" aria-label="Subtract effort unit" ng-if="activity.type=='Project'">-</span>
+						<span class="effort-control" title="Add effort unit" aria-label="Add effort unit" ng-if="activity.type=='Project'">+</span>
+						<span class="effort-value" contenteditable="{{activity.type=='Project'?'true':'false'}}">0:00</span>
 					</td>
 					<td class="mdc-data-table__cell c04 sum">0:00</td>					
 				</tr>
