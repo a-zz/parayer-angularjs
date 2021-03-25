@@ -1,2 +1,3 @@
-# parayer
-(very early WIP)
+# parayer-angularjs
+
+(Discontinued, will be deleted soon)
